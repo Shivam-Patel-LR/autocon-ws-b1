@@ -1,0 +1,49 @@
+name,lat,long,vendor,capacity_gbps
+Charleston-SC,32.7765,-79.9311,Suomi Networks,4385
+Providence-RI,41.824,-71.4128,Tonio Networks,4309
+Washington-DC,38.9072,-77.0369,Suomi Networks,4034
+Raleigh-NC,35.7796,-78.6382,Tonio Networks,3864
+Boston-MA,42.3601,-71.0589,Agave Networks,3501
+Buffalo-NY,42.8864,-78.8784,Agave Networks,3447
+Nashville-TN,36.1627,-86.7816,Tonio Networks,3285
+Tampa-FL,27.9506,-82.4572,Suomi Networks,3178
+Richmond-VA,37.5407,-77.436,Tonio Networks,3061
+Norfolk-VA,36.8508,-76.2859,Toscana Systems,3051
+Cleveland-OH,41.4993,-81.6944,Toscana Systems,1983
+Knoxville-TN,35.9606,-83.9207,Tonio Networks,1973
+Wilmington-DE,39.7391,-75.5398,Toscana Systems,1963
+Jacksonville-FL,30.3322,-81.6557,Agave Networks,1954
+Columbia-SC,34.0007,-81.0348,Tonio Networks,1837
+Trenton-NJ,40.2171,-74.7429,Cadenza Networks,1829
+Lansing-MI,42.7325,-84.5555,Toscana Systems,1772
+Baltimore-MD,39.2904,-76.6122,Suomi Networks,1710
+Pittsburgh-PA,40.4406,-79.9959,Toscana Systems,1701
+Memphis-TN,35.1495,-90.049,Suomi Networks,1687
+Detroit-MI,42.3314,-83.0458,Agave Networks,1647
+Indianapolis-IN,39.7684,-86.1581,Toscana Systems,1636
+Springfield-IL,39.7817,-89.6501,Toscana Systems,1530
+Portland-ME,43.6591,-70.2568,Tonio Networks,1498
+Charlotte-NC,35.2271,-80.8431,Agave Networks,1493
+Dover-DE,39.1582,-75.5244,Suomi Networks,1319
+Philadelphia-PA,39.9526,-75.1652,Agave Networks,1259
+Cincinnati-OH,39.1031,-84.512,Tonio Networks,1178
+Newark-NJ,40.7357,-74.1724,Toscana Systems,1177
+Harrisburg-PA,40.2732,-76.8867,Tonio Networks,1175
+Burlington-VT,44.4759,-73.2121,Suomi Networks,1140
+Louisville-KY,38.2527,-85.7585,Toscana Systems,1135
+Lexington-KY,38.0406,-84.5037,Agave Networks,1127
+Chicago-IL,41.8781,-87.6298,Toscana Systems,1096
+Scranton-PA,41.409,-75.6624,Tonio Networks,969
+New Haven-CT,41.3083,-72.9279,Cadenza Networks,969
+Miami-FL,25.7617,-80.1918,Toscana Systems,849
+Dayton-OH,39.7589,-84.1916,Suomi Networks,807
+New York-NY,40.7128,-74.006,Tonio Networks,793
+Toledo-OH,41.6528,-83.5379,Cadenza Networks,734
+Orlando-FL,28.5383,-81.3792,Toscana Systems,733
+Syracuse-NY,43.0481,-76.1474,Agave Networks,718
+Manchester-NH,42.9956,-71.4548,Tonio Networks,609
+Hartford-CT,41.7658,-72.6734,Cadenza Networks,606
+Atlanta-GA,33.749,-84.388,Agave Networks,563
+Rochester-NY,43.1566,-77.6088,Agave Networks,493
+Grand Rapids-MI,42.9634,-85.6681,Cadenza Networks,488
+Albany-NY,42.6526,-73.7562,Suomi Networks,454

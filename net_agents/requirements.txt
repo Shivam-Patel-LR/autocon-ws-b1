@@ -1,0 +1,12 @@
+# Network Simulator SDK Dependencies
+httpx>=0.25.0
+pydantic>=2.0.0
+
+# Workshop Dependencies
+openai-agents>=0.4.0
+python-dotenv>=1.0.0
+
+# Optional Development Dependencies
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-mock>=3.11.0

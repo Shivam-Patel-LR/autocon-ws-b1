@@ -1,0 +1,20 @@
+[project]
+name = "autocon"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi>=0.119.0",
+    "geodatasets>=2024.8.0",
+    "geopandas>=1.1.1",
+    "httpx>=0.28.1",
+    "matplotlib>=3.10.7",
+    "networkx>=3.4.2",
+    "numpy>=2.3.3",
+    "pandas>=2.3.3",
+    "pydantic>=2.12.2",
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
+    "uvicorn>=0.37.0",
+]

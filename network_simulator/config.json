@@ -1,0 +1,258 @@
+{
+  "_metadata": {
+    "version": "1.0",
+    "description": "Configuration for synthetic network topology generation",
+    "last_updated": "2025-10-14"
+  },
+
+  "connection_algorithm": {
+    "_description": "Parameters controlling the three-phase connection building algorithm",
+
+    "gamma": {
+      "value": 0.0,
+      "description": "Capacity importance exponent in preference score formula: S(u,v) = (Cu × Cv)^gamma / d(u,v)^beta",
+      "role": "Controls how strongly node capacity influences connection preference. Higher values favor high-capacity pairs.",
+      "typical_range": [0.0, 2.0],
+      "units": "dimensionless",
+      "distribution_impact": "Higher gamma → more power-law distribution with long tail. Lower gamma → more uniform distribution. gamma=0.0 ignores capacity."
+    },
+
+    "beta": {
+      "value": 1.5,
+      "description": "Distance importance exponent in preference score formula",
+      "role": "Controls how strongly geographic distance penalizes connection preference. Higher values favor nearby nodes.",
+      "typical_range": [1.0, 3.0],
+      "units": "dimensionless",
+      "distribution_impact": "Higher beta → more localized connections. Lower beta → more long-distance connections."
+    },
+
+    "eta": {
+      "value": 0.10,
+      "description": "Weight fraction for Phase I spanning tree edges: weight = eta × min(residual_u, residual_v)",
+      "role": "Determines the capacity allocated to initial connectivity edges. Must be in (0, 0.5] to ensure capacity remains.",
+      "typical_range": [0.08, 0.5],
+      "units": "fraction",
+      "distribution_impact": "Lower eta → prevents early capacity depletion, more uniform weights. Iteration 6: final push."
+    },
+
+    "target_edges": {
+      "value": 200,
+      "description": "Target number of connections to create in the network",
+      "role": "Controls network density. More edges = more redundancy and paths between nodes.",
+      "typical_range": [150, 300],
+      "units": "count",
+      "note": "For 48 nodes, 200 edges gives average degree of ~8.3"
+    },
+
+    "noise_factor": {
+      "value": 0.01,
+      "description": "Random noise added to preference scores: score *= (1 + uniform(-noise, +noise))",
+      "role": "Adds organic variation to prevent deterministic ties in preference selection.",
+      "typical_range": [0.001, 0.05],
+      "units": "fraction",
+      "note": "Small values preserve algorithm behavior while breaking ties"
+    },
+
+    "random_seed": {
+      "value": 42,
+      "description": "Seed for random number generator to ensure reproducible results",
+      "role": "Allows exact replication of network topology across runs.",
+      "units": "integer",
+      "note": "Set to null for non-deterministic behavior"
+    }
+  },
+
+  "alpha_functions": {
+    "_description": "Parameters for alpha functions that scale edge weights in Phase II and Phase III",
+
+    "phase_ii": {
+      "_description": "Phase II: Greedy augmentation. Alpha function: α(S) = base + coefficient × normalized_score",
+
+      "alpha_base": {
+        "value": 0.12,
+        "description": "Minimum alpha value (when preference score is lowest)",
+        "role": "Sets floor for edge weight scaling: weight = alpha × min(residual_u, residual_v)",
+        "typical_range": [0.10, 0.5],
+        "units": "fraction"
+      },
+
+      "alpha_coefficient": {
+        "value": 0.01,
+        "description": "Alpha range above base (max alpha = base + coefficient)",
+        "role": "Controls variation in edge weights. Larger coefficient → more variation.",
+        "typical_range": [0.005, 0.3],
+        "units": "fraction",
+        "note": "Iteration 6: α ∈ [0.12, 0.13]. Final push for bell-shaped distribution."
+      }
+    },
+
+    "phase_iii": {
+      "_description": "Phase III: Local spokes for non-hub nodes. Same alpha formula as Phase II",
+
+      "alpha_base": {
+        "value": 0.12,
+        "description": "Minimum alpha value for Phase III edges",
+        "role": "Controls floor for spoke edge weights",
+        "typical_range": [0.10, 0.5],
+        "units": "fraction"
+      },
+
+      "alpha_coefficient": {
+        "value": 0.01,
+        "description": "Alpha range above base for Phase III",
+        "role": "Controls variation in spoke edge weights",
+        "typical_range": [0.005, 0.3],
+        "units": "fraction"
+      }
+    }
+  },
+
+  "graph_construction": {
+    "_description": "Low-level constants for graph building and validation",
+
+    "min_distance_threshold": {
+      "value": 0.001,
+      "description": "Minimum distance used in preference score calculation to avoid division by zero",
+      "role": "Prevents infinite preference scores for co-located nodes",
+      "units": "degrees (lat/long)",
+      "note": "Should be much smaller than typical inter-node distances"
+    },
+
+    "non_hub_threshold": {
+      "value": 0.75,
+      "description": "Percentile threshold defining non-hub nodes for Phase III",
+      "role": "Bottom 75% of nodes by capacity are considered non-hubs and get additional spoke connections",
+      "typical_range": [0.6, 0.8],
+      "units": "percentile",
+      "note": "0.75 means nodes in positions [36-48] out of 48 get extra spokes"
+    },
+
+    "spokes_per_node": {
+      "value": 2,
+      "description": "Maximum number of additional connections for each non-hub node in Phase III",
+      "role": "Controls how many extra links small nodes get to high-capacity neighbors",
+      "typical_range": [1, 3],
+      "units": "count",
+      "note": "Higher values increase connectivity of edge nodes"
+    },
+
+    "capacity_tolerance": {
+      "value": 1e-6,
+      "description": "Floating-point tolerance for capacity constraint validation",
+      "role": "Allows minor rounding errors without triggering capacity violation errors",
+      "units": "Gbps",
+      "note": "Should be much smaller than minimum node capacity (200 Gbps)"
+    }
+  },
+
+  "service_routing": {
+    "_description": "Parameters for capacity-constrained service path routing using two-stage algorithm",
+
+    "demand_gbps": {
+      "value": 5.0,
+      "description": "Fixed bandwidth demand per service (D)",
+      "role": "Each routed service reserves exactly D Gbps on every edge it traverses",
+      "typical_range": [5.0, 50.0],
+      "units": "Gbps",
+      "note": "Must be positive and less than minimum edge capacity"
+    },
+
+    "target_services": {
+      "value": 100,
+      "description": "Target total number of services to generate",
+      "role": "Combined count from Stage A (edge cover) and Stage B (randomized routing)",
+      "typical_range": [50, 200],
+      "units": "count",
+      "note": "Actual count may be slightly different based on network capacity"
+    },
+
+    "p_exponent": {
+      "value": 1.5,
+      "description": "Cost function exponent: cost(e) = (r_e/D)^(-p) + noise",
+      "role": "Controls preference for high-residual edges in Dijkstra. Higher p → stronger preference.",
+      "typical_range": [1.0, 2.5],
+      "units": "dimensionless",
+      "note": "p > 0 ensures edges with more residual capacity have lower cost"
+    },
+
+    "rho_exponent": {
+      "value": 1.0,
+      "description": "Endpoint sampling weight exponent: P(v) ∝ (Σ r_e)^rho",
+      "role": "Controls bias toward high-residual nodes as endpoints. Higher rho → stronger bias.",
+      "typical_range": [0.5, 2.0],
+      "units": "dimensionless",
+      "note": "rho = 0 gives uniform sampling, rho > 0 favors hubs with high residual capacity"
+    },
+
+    "noise_delta": {
+      "value": 0.01,
+      "description": "Uniform tie-breaking noise range: ε ~ Uniform(-δ, δ)",
+      "role": "Breaks ties in Dijkstra path selection for equal-cost paths",
+      "typical_range": [0.001, 0.05],
+      "units": "dimensionless",
+      "note": "Should be small relative to cost differences to avoid disrupting preferences"
+    },
+
+    "random_seed": {
+      "value": 42,
+      "description": "Random seed for reproducible service generation",
+      "role": "Ensures identical service paths across runs with same network topology",
+      "units": "integer",
+      "note": "Set to null for non-deterministic routing"
+    },
+
+    "enable_stage_a": {
+      "value": true,
+      "description": "Enable Stage A: guaranteed endpoint coverage via edge cover",
+      "role": "Ensures every node is source or destination of at least one service",
+      "note": "Recommended to keep enabled for complete network coverage"
+    }
+  },
+
+  "paths": {
+    "_description": "Directory paths for input data and output files",
+
+    "data_dir": {
+      "value": "data",
+      "description": "Directory containing input CSV files (network_elements.csv)",
+      "role": "Source location for network element definitions"
+    },
+
+    "output_dir": {
+      "value": "output",
+      "description": "Directory for generated visualizations and reports",
+      "role": "Destination for PNG files and analysis outputs"
+    }
+  },
+
+  "tuning_guide": {
+    "_description": "Quick reference for achieving different distribution shapes",
+
+    "bell_shaped_distribution": {
+      "description": "To match real-world OMS data with mode in center and decay on both sides",
+      "recommended_changes": {
+        "gamma": "Reduce to 0.5-0.8 (less capacity preference)",
+        "beta": "Reduce to 1.5 (moderate distance penalty)",
+        "eta": "Increase to 0.5 (center Phase I edges)",
+        "alpha_base_phase2": "Increase to 0.40 (tighter weight range)",
+        "alpha_coefficient_phase2": "Reduce to 0.10 (less variation)"
+      }
+    },
+
+    "power_law_distribution": {
+      "description": "Hub-and-spoke with many small edges, few large edges (current settings)",
+      "current_settings": "gamma=1.5, beta=2.0, eta=0.4, alpha ∈ [0.25, 0.50]"
+    },
+
+    "uniform_distribution": {
+      "description": "More evenly distributed edge weights",
+      "recommended_changes": {
+        "gamma": "Set to 0.0 (ignore capacity)",
+        "beta": "Set to 0.0 (ignore distance)",
+        "eta": "Set to 0.45",
+        "alpha_base_phase2": "Set to 0.45",
+        "alpha_coefficient_phase2": "Set to 0.05"
+      }
+    }
+  }
+}

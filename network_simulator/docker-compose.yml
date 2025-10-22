@@ -1,0 +1,14 @@
+services:
+  network-simulator:
+    build: .
+    container_name: network_simulator
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./data:/app/data
+      - ./output:/app/output
+      - ./src:/app/src
+    environment:
+      - PYTHONUNBUFFERED=1
+    stdin_open: true
+    tty: true

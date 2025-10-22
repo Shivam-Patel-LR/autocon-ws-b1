@@ -1,0 +1,18 @@
+# AI Agents Workshop Dependencies
+# Compatible with Python >=3.12
+# For workshop participants using pip
+
+# Network Simulator SDK Dependencies
+httpx>=0.25.0
+pydantic>=2.0.0
+
+# AI Agent Framework
+openai-agents>=0.4.0
+
+# Configuration Management
+python-dotenv>=1.0.0
+
+# Development & Testing Dependencies (Optional)
+pytest>=7.4.0
+pytest-asyncio>=0.21.0
+pytest-mock>=3.11.0

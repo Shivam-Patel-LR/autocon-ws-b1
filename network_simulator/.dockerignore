@@ -1,0 +1,13 @@
+__pycache__/
+*.py[cod]
+*.so
+.Python
+*.egg-info
+.venv/
+venv/
+ENV/
+output/*.png
+output/*.jpg
+.git/
+.gitignore
+*.md

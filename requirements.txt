@@ -1,0 +1,31 @@
+# AutoCon Project Dependencies
+# Compatible with Python >=3.12
+# Generated from pyproject.toml for pip users
+
+# Web Framework
+fastapi>=0.119.0
+uvicorn>=0.37.0
+
+# Geographic Data Processing
+geodatasets>=2024.8.0
+geopandas>=1.1.1
+
+# Data Processing
+pandas>=2.3.3
+numpy>=2.3.3
+
+# Networking & Graph Algorithms
+networkx>=3.4.2
+
+# Visualization
+matplotlib>=3.10.7
+
+# HTTP Client
+httpx>=0.28.1
+
+# Data Validation
+pydantic>=2.12.2
+
+# Testing
+pytest>=8.4.2
+pytest-asyncio>=1.2.0
