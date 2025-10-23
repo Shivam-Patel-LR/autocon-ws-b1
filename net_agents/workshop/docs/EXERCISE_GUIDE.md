@@ -534,11 +534,11 @@ print(result.final_output)
 
 Your agent should:
 
-- ✅ Answer network topology questions correctly
-- ✅ Explain SDK methods with examples
-- ✅ Provide helpful hints for exercises
-- ✅ Maintain context across conversation turns
-- ✅ Admit when it doesn't have tools/access
+- Answer network topology questions correctly
+- Explain SDK methods with examples
+- Provide helpful hints for exercises
+- Maintain context across conversation turns
+- Admit when it doesn't have tools/access
 
 ### Bonus Challenges
 
@@ -927,11 +927,11 @@ print(result.final_output)
 
 Your agent should:
 
-- ✅ Find routes given node names or UUIDs
-- ✅ Check capacity constraints
-- ✅ Return well-formatted paths
-- ✅ Handle errors gracefully (no route found, etc.)
-- ✅ Work across multiple conversation turns
+- Find routes given node names or UUIDs
+- Check capacity constraints
+- Return well-formatted paths
+- Handle errors gracefully (no route found, etc.)
+- Work across multiple conversation turns
 
 ### Common Issues & Solutions
 
@@ -1261,12 +1261,12 @@ print(result.final_output)
 
 Your agent should:
 
-- ✅ Parse planning agent output correctly
-- ✅ Validate path structure before provisioning
-- ✅ Successfully create services
-- ✅ Verify provisioning completed
-- ✅ Handle errors gracefully
-- ✅ Support cleanup operations
+- Parse planning agent output correctly
+- Validate path structure before provisioning
+- Successfully create services
+- Verify provisioning completed
+- Handle errors gracefully
+- Support cleanup operations
 
 ### Common Issues & Solutions
 
@@ -1701,11 +1701,11 @@ class WorkflowOrchestrator:
 
 By the end of this exercise, you should be able to:
 
-- ✅ Plan and provision services end-to-end
-- ✅ Handle success and failure cases
-- ✅ Coordinate multiple agents
-- ✅ Validate intermediate results
-- ✅ Explain what each agent does and why
+- Plan and provision services end-to-end
+- Handle success and failure cases
+- Coordinate multiple agents
+- Validate intermediate results
+- Explain what each agent does and why
 
 ### Key Takeaways
 
@@ -1719,32 +1719,32 @@ By the end of this exercise, you should be able to:
 
 ## Conclusion & Next Steps
 
-Congratulations on completing the workshop! You've learned:
+Workshop topics covered:
 
-✅ How to use OpenAI Agents SDK
-✅ Agentic design patterns
-✅ Segmentation of responsibilities
-✅ Tool calling and function integration
-✅ Prompt engineering for agents
-✅ Multi-agent workflows
+- How to use OpenAI Agents SDK
+- Agentic design patterns
+- Segmentation of responsibilities
+- Tool calling and function integration
+- Prompt engineering for agents
+- Multi-agent workflows
 
 ### What You've Built
 
-1. **Support Agent** - Helps users without tools
-2. **Planning Agent** - Finds network routes with capacity checking
-3. **Provisioning Agent** - Creates services on the network
-4. **Full Workflow** - End-to-end service provisioning
+1. Support Agent - Helps users without tools
+2. Planning Agent - Finds network routes with capacity checking
+3. Provisioning Agent - Creates services on the network
+4. Full Workflow - End-to-end service provisioning
 
 ### Going Further
 
-**Ideas for extension**:
+Ideas for extension:
 
 - Add monitoring agent (track capacity over time)
 - Build optimization agent (improve network efficiency)
 - Create failure recovery agent (reroute on failures)
 - Implement policy agent (enforce business rules)
 
-**Advanced topics to explore**:
+Advanced topics to explore:
 
 - Async agents for parallel operations
 - Agent memory and learning
@@ -1753,15 +1753,8 @@ Congratulations on completing the workshop! You've learned:
 
 ### Resources
 
-- **OpenAI Agents SDK**: https://openai.github.io/openai-agents-python/
-- **Network Simulator API**: http://localhost:8003/docs
-- **SDK Documentation**: ../README.md
-- **Test Report**: ../TEST_REPORT.md
-
-### Feedback
-
-We'd love to hear your thoughts! What worked? What could be improved?
+- OpenAI Agents SDK: https://openai.github.io/openai-agents-python/
+- Network Simulator API: http://localhost:8003/docs
+- SDK Documentation: ../README.md
 
 ---
-
-**Thank you for participating!** 🎉

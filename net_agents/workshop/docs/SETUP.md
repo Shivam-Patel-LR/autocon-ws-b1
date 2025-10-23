@@ -128,35 +128,35 @@ from network_simulator_client import NetworkSimulatorClient
 try:
     client = NetworkSimulatorClient(base_url="http://localhost:8003")
     health = client.health_check()
-    print(f"✓ Network Simulator API: {health.status}")
+    print(f"[OK] Network Simulator API: {health.status}")
 
     stats = client.get_database_stats()
-    print(f"✓ Network loaded: {stats.nodes} nodes, {stats.edges} edges, {stats.services} services")
+    print(f"[OK] Network loaded: {stats.nodes} nodes, {stats.edges} edges, {stats.services} services")
 
     client.close()
 except Exception as e:
-    print(f"✗ API Connection Failed: {e}")
+    print(f"[FAIL] API Connection Failed: {e}")
     print("  Make sure the simulator is running: docker compose up -d")
     exit(1)
 
 # Check OpenAI Agents SDK
 try:
-    import openai_agents
-    print(f"✓ OpenAI Agents SDK installed (version {openai_agents.__version__})")
+    import agents
+    print("[OK] OpenAI Agents SDK installed")
 except ImportError:
-    print("✗ OpenAI Agents SDK not installed")
+    print("[FAIL] OpenAI Agents SDK not installed")
     print("  Install with: uv pip install openai-agents")
     exit(1)
 
 # Check API key
 if not os.getenv("OPENAI_API_KEY"):
-    print("✗ OPENAI_API_KEY not set")
+    print("[FAIL] OPENAI_API_KEY not set")
     print("  Create a .env file with your API key")
     exit(1)
 else:
-    print("✓ OpenAI API key configured")
+    print("[OK] OpenAI API key configured")
 
-print("\n🎉 Setup complete! You're ready to start building agents.")
+print("\nSetup complete! You're ready to start building agents.")
 ```
 
 Run it:
@@ -164,6 +164,8 @@ Run it:
 cd net_agents/workshop
 python verify_setup.py
 ```
+
+If all checks pass, the setup is complete.
 
 ---
 
@@ -188,9 +190,9 @@ with NetworkSimulatorClient(base_url="http://localhost:8003") as client:
     # Check network health
     violations = client.get_capacity_violations()
     if violations:
-        print(f"\n⚠ {len(violations)} capacity violations detected")
+        print(f"\n[WARNING] {len(violations)} capacity violations detected")
     else:
-        print(f"\n✓ Network is healthy (no capacity violations)")
+        print(f"\n[OK] Network is healthy (no capacity violations)")
 
     # Compute a sample route
     route = client.compute_route(
@@ -381,10 +383,10 @@ During the workshop:
 
 ## Next Steps
 
-1. ✓ Complete this setup guide
-2. → Read [NETWORK_REFERENCE.md](NETWORK_REFERENCE.md) to understand the network
-3. → Start [EXERCISE_GUIDE.md](EXERCISE_GUIDE.md) with Exercise 1
-4. → Build your first agent!
+1. Complete this setup guide
+2. Read [NETWORK_REFERENCE.md](NETWORK_REFERENCE.md) to understand the network
+3. Start [EXERCISE_GUIDE.md](EXERCISE_GUIDE.md) with Exercise 1
+4. Build your first agent
 
 ---
 
@@ -396,5 +398,3 @@ During the workshop:
 - **Network Simulator Client README**: ../README.md
 
 ---
-
-Happy building! 🚀

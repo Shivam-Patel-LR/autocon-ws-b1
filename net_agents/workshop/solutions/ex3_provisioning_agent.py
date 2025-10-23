@@ -30,96 +30,38 @@ load_dotenv()
 @function_tool
 async def create_edge(node1_uuid: str, node2_uuid: str, capacity_gbps: float) -> str:
     """
-    Attempt to create an edge between two network nodes (with constraint).
+    Create a parallel edge to add capacity to an existing connection.
 
-    IMPORTANT CONSTRAINT: This tool enforces a business rule that edges can only be
-    created where a connection already exists between two nodes. This represents the
-    concept of expanding capacity on existing network links rather than creating
-    entirely new physical connections. You cannot create edges between nodes that
-    are not already connected.
+    IMPORTANT CONSTRAINT: This tool can ONLY add capacity to existing edges.
+    You cannot create entirely new connections between nodes that aren't already
+    connected. This ensures network topology integrity.
 
-    NOTE: The underlying database also enforces uniqueness, so even if an edge exists,
-    you cannot create a duplicate edge between the same two nodes. This constraint
-    checks first whether ANY connection exists before attempting creation.
+    Use this tool when you need to increase bandwidth between two nodes that
+    already have a connection but need more capacity for additional services.
 
-    Parameters
-    ----------
-    node1_uuid : str
-        The unique identifier (UUID) of the first endpoint node.
-        Must be a valid UUID of an existing node in the network.
-        Example: "550e8400-e29b-41d4-a716-446655440000"
+    Args:
+        node1_uuid: UUID of the first endpoint node
+        node2_uuid: UUID of the second endpoint node
+        capacity_gbps: Additional capacity to add in Gbps (must be > 0)
 
-    node2_uuid : str
-        The unique identifier (UUID) of the second endpoint node.
-        Must be a valid UUID of an existing node in the network.
-        Must be different from node1_uuid (self-loops not allowed).
-        An edge must already exist between these two nodes.
-        Example: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+    Returns:
+        JSON string containing:
+        SUCCESS CASE:
+        - uuid: New edge UUID
+        - node1_uuid, node2_uuid: Endpoint UUIDs
+        - capacity_gbps: Capacity of the new parallel edge
+        - existing_edge_uuid: UUID of the original edge
+        - created_at, updated_at: Timestamps
+        - message: Success confirmation
 
-    capacity_gbps : float
-        The capacity for the edge in Gigabits per second.
-        Must be a positive value greater than 0.
-        Example: 50.0 for a 50 Gbps edge
+        FAILURE CASE (no existing edge):
+        - error: Explanation that no existing connection exists
+        - constraint: Policy explanation
+        - node1_uuid, node2_uuid, capacity_gbps: Request parameters
 
-    Returns
-    -------
-    str
-        JSON string containing the result:
-
-        On Success (edge exists, creation allowed by constraint but may fail on duplicate):
-        - uuid (str): Unique identifier for the created edge (if successful)
-        - node1_uuid (str): UUID of the first endpoint node
-        - node2_uuid (str): UUID of the second endpoint node
-        - capacity_gbps (float): Capacity of the edge in Gbps
-        - existing_edge_uuid (str): UUID of the pre-existing edge
-        - created_at (str): ISO 8601 timestamp when edge was created
-        - updated_at (str): ISO 8601 timestamp of last update
-        - message (str): Success confirmation message
-
-        On Constraint Failure (no edge exists):
-        - error (str): "Cannot create edge: no existing connection between these nodes"
-        - node1_uuid (str): Echo of the first node UUID
-        - node2_uuid (str): Echo of the second node UUID
-        - capacity_gbps (float): Echo of the requested capacity
-        - constraint (str): Explanation of constraint
-
-        On API Failure (duplicate edge or other error):
-        - error (str): Error message from API
-        - node1_uuid (str): Echo of the first node UUID
-        - node2_uuid (str): Echo of the second node UUID
-        - capacity_gbps (float): Echo of the requested capacity
-
-    Raises
-    ------
-    NodeNotFoundError
-        If either node1_uuid or node2_uuid does not exist in the network
-    ValidationError
-        If capacity_gbps is invalid (not positive) or if node1_uuid equals node2_uuid,
-        or if no existing edge exists between the nodes (constraint violation),
-        or if edge already exists between these nodes (database uniqueness constraint)
-    APIConnectionError
-        If unable to connect to the Network Simulator API
-
-    Examples
-    --------
-    Constraint failure - no existing connection:
-        >>> create_edge(boston_uuid, miami_uuid, 100.0)
-        {"error": "Cannot create edge: no existing connection between these nodes", ...}
-
-    Constraint passed but duplicate edge:
-        >>> # Edge already exists between node1 and node2
-        >>> create_edge(node1_uuid, node2_uuid, 50.0)
-        {"error": "[HTTP 400] Edge between these nodes already exists", ...}
-
-    Notes
-    -----
-    - CONSTRAINT: An edge must already exist between the two nodes to pass validation
-    - This business rule represents capacity expansion intent, not new physical links
-    - The database enforces uniqueness, preventing duplicate edges between same nodes
-    - This constraint adds a pre-check before attempting API edge creation
-    - Edges are bidirectional; order of node1 and node2 doesn't affect functionality
-    - Use delete_edge() to remove edges when no longer needed
-    - Edges cannot be deleted if they are being used by active services
+    Example:
+        Nodes A and B have a 100 Gbps link that's heavily utilized.
+        create_edge(uuid_A, uuid_B, 50.0) adds a parallel 50 Gbps link.
     """
     client = NetworkSimulatorClient(base_url="http://localhost:8003")
 
@@ -180,63 +122,31 @@ async def create_edge(node1_uuid: str, node2_uuid: str, capacity_gbps: float) ->
 @function_tool
 async def delete_edge(edge_uuid: str) -> str:
     """
-    Delete an existing network edge by its UUID.
+    Delete a network edge (connection) from the network.
 
-    This tool removes an edge from the network topology. The edge can only be
-    deleted if it is not currently being used by any active services. If services
-    are using this edge, they must be deleted first before the edge can be removed.
+    IMPORTANT CONSTRAINT: You can only delete edges that are NOT being used
+    by any active services. If services are using this edge, the deletion will
+    fail with a conflict error.
 
-    Parameters
-    ----------
-    edge_uuid : str
-        The unique identifier (UUID) of the edge to delete.
-        Must be a valid UUID of an existing edge in the network.
-        Example: "7c9e6679-7425-40de-944b-e07fc1f90ae7"
+    Use this tool to remove unused edges or clean up after deprovisioning services.
 
-    Returns
-    -------
-    str
-        JSON string containing the deletion result:
+    Args:
+        edge_uuid: UUID of the edge to delete
 
-        On Success:
-        - message (str): Success confirmation message
-        - edge_uuid (str): UUID of the deleted edge
-        - deleted_at (str): ISO 8601 timestamp of deletion
+    Returns:
+        JSON string containing:
+        SUCCESS CASE:
+        - message: Confirmation of deletion
+        - edge_uuid: UUID of the deleted edge
+        - deleted_at: Timestamp of deletion
 
-        On Failure:
-        - error (str): Error message describing what went wrong
-        - edge_uuid (str): Echo of the requested edge UUID
+        FAILURE CASE:
+        - error: Explanation (e.g., edge in use by services, edge not found)
+        - edge_uuid: UUID that was attempted
 
-    Raises
-    ------
-    EdgeNotFoundError
-        If the specified edge UUID does not exist in the network
-    ResourceConflictError
-        If the edge is currently being used by one or more services
-    APIConnectionError
-        If unable to connect to the Network Simulator API
-
-    Examples
-    --------
-    Delete an unused edge:
-        >>> delete_edge("7c9e6679-7425-40de-944b-e07fc1f90ae7")
-        {"message": "Edge deleted successfully", "edge_uuid": "7c9e6679..."}
-
-    Edge in use by services:
-        >>> delete_edge("7c9e6679-7425-40de-944b-e07fc1f90ae7")
-        {"error": "Cannot delete edge: currently used by 3 services", ...}
-
-    Edge not found:
-        >>> delete_edge("invalid-uuid")
-        {"error": "Edge not found", "edge_uuid": "invalid-uuid"}
-
-    Notes
-    -----
-    - Deletion is permanent and cannot be undone
-    - All services using this edge must be deleted first
-    - Use get_services_by_edge() to check which services are using the edge
-    - After deletion, any routes using this edge will need to be recalculated
-    - Consider the impact on network connectivity before deleting edges
+    Example:
+        edge_uuid = "0c929850-79fc-4acd-a69d-163dc318353a"
+        Deletes the edge if no services are using it
     """
     client = NetworkSimulatorClient(base_url="http://localhost:8003")
 
@@ -267,131 +177,49 @@ async def create_service(
     path_edge_uuids: list[str],
 ) -> str:
     """
-    Create a new service along a specified network path.
+    Provision a new network service along a specified path.
 
-    This tool provisions a service (network connection) with allocated bandwidth
-    along a pre-computed path through the network. The service reserves the specified
-    bandwidth (demand_gbps) on all edges in the path. The path must be valid, with
-    all nodes and edges existing and sufficient capacity available.
+    This is the PRIMARY tool for service provisioning. It creates a service that
+    reserves bandwidth on all edges in the path. The service will consume capacity
+    from each edge it traverses.
 
-    Parameters
-    ----------
-    name : str
-        Human-readable name for the service.
-        Should be descriptive and unique.
-        Example: "Service-NYC-BOS-001" or "CustomerA-Primary-Link"
+    VALIDATION REQUIREMENTS:
+    - Source must be the first node in path_node_uuids
+    - Destination must be the last node in path_node_uuids
+    - Number of edges must equal number of nodes minus 1
+    - All edges must have sufficient available capacity for the demand
+    - Path must be valid (consecutive nodes connected by edges)
 
-    source_node_uuid : str
-        The unique identifier (UUID) of the source (origin) node.
-        Must be a valid UUID of an existing node in the network.
-        Must match the first node in path_node_uuids.
-        Example: "550e8400-e29b-41d4-a716-446655440000"
+    Args:
+        name: Descriptive name for the service (e.g., "NYC-to-Boston-Service-001")
+        source_node_uuid: UUID of the origin node
+        destination_node_uuid: UUID of the destination node
+        demand_gbps: Bandwidth to reserve in Gbps (must be > 0)
+        path_node_uuids: Ordered list of node UUIDs from source to destination
+        path_edge_uuids: Ordered list of edge UUIDs connecting the nodes
 
-    destination_node_uuid : str
-        The unique identifier (UUID) of the destination (target) node.
-        Must be a valid UUID of an existing node in the network.
-        Must match the last node in path_node_uuids.
-        Must be different from source_node_uuid.
-        Example: "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+    Returns:
+        JSON string containing:
+        SUCCESS CASE:
+        - uuid: Unique service identifier
+        - name: Service name
+        - source_node_uuid, destination_node_uuid: Endpoints
+        - demand_gbps: Bandwidth reserved
+        - hop_count: Number of hops (edges) in path
+        - total_distance_km: Geographic distance of the path
+        - path_node_uuids: Complete node path
+        - path_edge_uuids: Complete edge path
+        - service_timestamp: When service was created
+        - created_at: Creation timestamp
 
-    demand_gbps : float
-        The required bandwidth for this service in Gigabits per second.
-        Must be positive and greater than 0.
-        This bandwidth will be reserved on all edges in the path.
-        Example: 10.0 for a 10 Gbps service
+        FAILURE CASE:
+        - error: Explanation (capacity violation, invalid path, etc.)
+        - Request parameters
 
-    path_node_uuids : list[str]
-        Ordered list of node UUIDs forming the service path.
-        Must start with source_node_uuid and end with destination_node_uuid.
-        Must contain at least 2 nodes (source and destination).
-        Each consecutive pair of nodes must be connected by an edge.
-        Example: ["node1-uuid", "node2-uuid", "node3-uuid"]
-
-    path_edge_uuids : list[str]
-        Ordered list of edge UUIDs forming the service path.
-        Must contain exactly len(path_node_uuids) - 1 edges.
-        Each edge must connect the corresponding consecutive nodes.
-        All edges must have sufficient available capacity for demand_gbps.
-        Example: ["edge1-uuid", "edge2-uuid"]
-
-    total_distance_km : float
-        Total geographic distance of the path in kilometers.
-        Must be non-negative.
-        Should match the sum of distances between consecutive nodes.
-        Example: 347.5
-
-    routing_stage : str, optional
-        Routing stage identifier for tracking different routing phases.
-        Must be either "stage_a" or "stage_b".
-        Default: "stage_a"
-        Example: "stage_b" for secondary routing phase
-
-    Returns
-    -------
-    str
-        JSON string containing the created service information:
-
-        On Success:
-        - uuid (str): Unique identifier for the newly created service
-        - name (str): Service name
-        - source_node_uuid (str): UUID of the source node
-        - destination_node_uuid (str): UUID of the destination node
-        - demand_gbps (float): Bandwidth demand in Gbps
-        - hop_count (int): Number of hops (edges) in the path
-        - total_distance_km (float): Total path distance in km
-        - routing_stage (str): Routing stage identifier
-        - path_node_uuids (List[str]): Node UUIDs in the path
-        - path_edge_uuids (List[str]): Edge UUIDs in the path
-        - service_timestamp (str): ISO 8601 timestamp when service was created
-        - created_at (str): ISO 8601 timestamp of database creation
-        - message (str): Success confirmation message
-
-        On Failure:
-        - error (str): Error message describing what went wrong
-        - name (str): Echo of the requested service name
-        - source_node_uuid (str): Echo of the source node UUID
-        - destination_node_uuid (str): Echo of the destination node UUID
-
-    Raises
-    ------
-    NodeNotFoundError
-        If source, destination, or any path node does not exist
-    EdgeNotFoundError
-        If any path edge does not exist
-    ValidationError
-        If path is invalid, capacity insufficient, or parameters are inconsistent
-    APIConnectionError
-        If unable to connect to the Network Simulator API
-
-    Examples
-    --------
-    Create a service using a computed route:
-        >>> create_service(
-        ...     name="Service-NYC-BOS-001",
-        ...     source_node_uuid="node1-uuid",
-        ...     destination_node_uuid="node3-uuid",
-        ...     demand_gbps=10.0,
-        ...     path_node_uuids=["node1-uuid", "node2-uuid", "node3-uuid"],
-        ...     path_edge_uuids=["edge1-uuid", "edge2-uuid"]
-        ... )
-        {"uuid": "service-123", "hop_count": 2, "message": "Service created successfully"}
-
-    Invalid path (edge count mismatch):
-        >>> create_service(..., path_node_uuids=[3 nodes], path_edge_uuids=[1 edge], ...)
-        {"error": "Edge count must equal node count - 1", ...}
-
-    Insufficient capacity:
-        >>> create_service(..., demand_gbps=1000.0, ...)
-        {"error": "Insufficient capacity on edge edge1-uuid", ...}
-
-    Notes
-    -----
-    - Service creation reserves bandwidth on all edges in the path
-    - Path validation ensures all nodes and edges exist and are properly connected
-    - Each edge's available capacity is reduced by demand_gbps after service creation
-    - Use the find_and_plan_route() tool from the planning agent to compute valid paths
-    - Services can be deleted using delete_service() to free up capacity
-    - Service timestamps track when the service was logically created vs. database creation
+    Example:
+        name = "Service-NYC-BOS", source = uuid_NYC, destination = uuid_BOS,
+        demand = 10.0, path_nodes = [uuid_NYC, uuid_ALB, uuid_BOS],
+        path_edges = [edge_NYC_ALB, edge_ALB_BOS]
     """
     client = NetworkSimulatorClient(base_url="http://localhost:8003")
 
@@ -441,58 +269,28 @@ async def create_service(
 @function_tool
 async def delete_service(service_uuid: str) -> str:
     """
-    Delete an existing service and free up its reserved bandwidth.
+    Delete an existing network service and free its reserved capacity.
 
-    This tool removes a service from the network and releases the bandwidth
-    (demand_gbps) that was reserved on all edges in the service's path. After
-    deletion, the freed capacity becomes available for other services.
+    Use this tool to deprovision services that are no longer needed. Deleting
+    a service will free up the bandwidth it was consuming on all edges in its path.
 
-    Parameters
-    ----------
-    service_uuid : str
-        The unique identifier (UUID) of the service to delete.
-        Must be a valid UUID of an existing service in the network.
-        Example: "service-uuid-123"
+    Args:
+        service_uuid: UUID of the service to delete
 
-    Returns
-    -------
-    str
-        JSON string containing the deletion result:
+    Returns:
+        JSON string containing:
+        SUCCESS CASE:
+        - message: Confirmation of deletion
+        - service_uuid: UUID of the deleted service
+        - deleted_at: Timestamp of deletion
 
-        On Success:
-        - message (str): Success confirmation message
-        - service_uuid (str): UUID of the deleted service
-        - deleted_at (str): ISO 8601 timestamp of deletion
+        FAILURE CASE:
+        - error: Explanation (service not found, etc.)
+        - service_uuid: UUID that was attempted
 
-        On Failure:
-        - error (str): Error message describing what went wrong
-        - service_uuid (str): Echo of the requested service UUID
-
-    Raises
-    ------
-    ServiceNotFoundError
-        If the specified service UUID does not exist in the network
-    APIConnectionError
-        If unable to connect to the Network Simulator API
-
-    Examples
-    --------
-    Delete a service:
-        >>> delete_service("service-uuid-123")
-        {"message": "Service service-uuid-123 deleted successfully", ...}
-
-    Service not found:
-        >>> delete_service("invalid-uuid")
-        {"error": "Service not found", "service_uuid": "invalid-uuid"}
-
-    Notes
-    -----
-    - Deletion is permanent and cannot be undone
-    - Bandwidth reserved by the service is immediately freed on all path edges
-    - After deletion, edge utilization metrics are automatically updated
-    - Use get_service() before deletion if you need to save service details
-    - Deleting a service does not delete the nodes or edges it used
-    - Consider checking capacity utilization before and after deletion
+    Example:
+        service_uuid = "4b20d4ae-8932-4f05-b093-cc2202dd3e1e"
+        Deletes the service and frees its reserved bandwidth
     """
     client = NetworkSimulatorClient(base_url="http://localhost:8003")
 
@@ -516,49 +314,7 @@ async def delete_service(service_uuid: str) -> str:
 @function_tool
 async def get_database_stats() -> str:
     """
-    Retrieve current database statistics including counts of all network entities.
-
-    This tool provides a high-level overview of the network topology by returning
-    the total counts of nodes, edges, and services currently in the database. It's
-    useful for monitoring the network state and verifying provisioning operations.
-
-    Returns
-    -------
-    str
-        JSON string containing database statistics:
-
-        - nodes (int): Total number of network nodes in the database
-        - edges (int): Total number of edges (connections) in the database
-        - services (int): Total number of provisioned services in the database
-        - timestamp (str): ISO 8601 timestamp when statistics were retrieved
-
-    Raises
-    ------
-    APIConnectionError
-        If unable to connect to the Network Simulator API
-    APITimeoutError
-        If the API request times out
-
-    Examples
-    --------
-    Get current network statistics:
-        >>> get_database_stats()
-        {"nodes": 48, "edges": 196, "services": 150, "timestamp": "2024-01-15T12:00:00Z"}
-
-    After creating new edges:
-        >>> # Initial: {"nodes": 48, "edges": 196, "services": 150}
-        >>> create_edge(node1, node2, 50.0)
-        >>> get_database_stats()
-        {"nodes": 48, "edges": 197, "services": 150, ...}  # Edge count increased
-
-    Notes
-    -----
-    - Statistics reflect the current state of the database
-    - Useful for verifying successful creation or deletion operations
-    - Counts include all entities, both active and recently modified
-    - The typical network has ~48 nodes, ~200 edges, and ~100+ services
-    - Use this tool to monitor network growth over time
-    - Statistics query is fast and does not impact network performance
+    TODO: Annotate this
     """
     client = NetworkSimulatorClient(base_url="http://localhost:8003")
 
@@ -583,28 +339,65 @@ async def get_database_stats() -> str:
 # Create the provisioning agent
 provisioning_agent = Agent(
     name="NetworkProvisioningAgent",
-    instructions="""You are a network provisioning agent for the Network Simulator API. YOU OPERATE STRICTLY USING PLAINTEXT. DO NOT USE MARKDOWN!
+    instructions="""
+    You are a Network Provisioning Agent specialized in creating and managing network services and capacity.
 
-Your job is to execute provisioning operations based on user requests by calling the appropriate tools.
+    YOUR ROLE:
+    - Provision new network services on planned paths
+    - Add capacity to existing connections when needed
+    - Delete services to free up bandwidth
+    - Remove unused edges from the network
+    - Ensure all operations maintain network integrity
 
-Available tools:
-- create_edge: Add parallel capacity to an existing edge (CONSTRAINT: can only create edges where a connection already exists between nodes - this represents capacity expansion, not new physical links)
-- delete_edge: Delete an existing edge by UUID (only if not used by services)
-- create_service: Provision a new service along a specified path with bandwidth reservation
-- delete_service: Delete an existing service by UUID and free up its bandwidth
-- get_database_stats: Get current counts of nodes, edges, and services
+    THE NETWORK:
+    - 48 network nodes across the eastern United States
+    - ~200 bidirectional edges (connections) with capacity limits
+    - Services consume bandwidth on the edges they traverse
+    - Network topology is protected - you can only expand existing connections
 
-IMPORTANT: When creating edges, you can ONLY add capacity to existing connections. You cannot create edges between nodes that are not already connected. This represents expanding capacity on existing links rather than building new physical infrastructure.
+    YOUR TOOLS:
+    1. create_service(...) - PRIMARY TOOL: Provision a new service on a path
+    2. delete_service(service_uuid) - Remove a service and free its capacity
+    3. create_edge(node1_uuid, node2_uuid, capacity_gbps) - Add capacity to existing connection
+    4. delete_edge(edge_uuid) - Remove an unused edge
 
-When creating services, ensure you have:
-1. A valid path (from the planning agent's find_and_plan_route tool)
-2. Source and destination node UUIDs
-3. Path node UUIDs (ordered list)
-4. Path edge UUIDs (ordered list, length = node count - 1)
-5. Total distance in km
-6. Bandwidth demand in Gbps
+    CRITICAL CONSTRAINTS:
+    1. SERVICES: Must have valid paths where:
+       - Source is first node in path
+       - Destination is last node in path
+       - Edge count = node count - 1
+       - All edges have sufficient capacity
+    2. EDGES: Can ONLY create parallel edges on existing connections
+       - Cannot create brand new connections between unconnected nodes
+       - Can only delete edges not used by any service
+    3. CAPACITY: All operations must respect capacity constraints
 
-Execute the requested operations and present clear results to the user. NO IMAGES!""",
+    WORKFLOW FOR SERVICE PROVISIONING:
+    1. Receive a planned route from the planning agent with:
+       - Source and destination UUIDs
+       - Path nodes (ordered list)
+       - Path edges (ordered list)
+       - Required bandwidth (demand_gbps)
+    2. Validate the path structure (counts match, endpoints correct)
+    3. Call create_service() with all required parameters
+    4. Confirm success or explain failure clearly
+
+    OUTPUT FORMAT:
+    When provisioning succeeds, include:
+    - Service UUID (for future reference)
+    - Service name
+    - Endpoints (source and destination)
+    - Bandwidth reserved (demand_gbps)
+    - Number of hops
+    - Total distance
+
+    IMPORTANT NOTES:
+    - Always validate path structure before calling create_service()
+    - If capacity is insufficient, explain which edge is the bottleneck
+    - When deleting, confirm the service/edge UUID exists
+    - All tool responses are JSON strings - parse them to extract information
+    - Be clear about success vs failure
+    """,
     model=OpenAIResponsesModel(model=GENERATIVE_MODEL, openai_client=llm_client),
     tools=[
         create_edge,

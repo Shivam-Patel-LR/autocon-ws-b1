@@ -30,7 +30,38 @@ load_dotenv()
 @function_tool
 async def create_edge(node1_uuid: str, node2_uuid: str, capacity_gbps: float) -> str:
     """
-    TODO: Annotate this
+    Create a parallel edge to add capacity to an existing connection.
+
+    IMPORTANT CONSTRAINT: This tool can ONLY add capacity to existing edges.
+    You cannot create entirely new connections between nodes that aren't already
+    connected. This ensures network topology integrity.
+
+    Use this tool when you need to increase bandwidth between two nodes that
+    already have a connection but need more capacity for additional services.
+
+    Args:
+        node1_uuid: UUID of the first endpoint node
+        node2_uuid: UUID of the second endpoint node
+        capacity_gbps: Additional capacity to add in Gbps (must be > 0)
+
+    Returns:
+        JSON string containing:
+        SUCCESS CASE:
+        - uuid: New edge UUID
+        - node1_uuid, node2_uuid: Endpoint UUIDs
+        - capacity_gbps: Capacity of the new parallel edge
+        - existing_edge_uuid: UUID of the original edge
+        - created_at, updated_at: Timestamps
+        - message: Success confirmation
+
+        FAILURE CASE (no existing edge):
+        - error: Explanation that no existing connection exists
+        - constraint: Policy explanation
+        - node1_uuid, node2_uuid, capacity_gbps: Request parameters
+
+    Example:
+        Nodes A and B have a 100 Gbps link that's heavily utilized.
+        create_edge(uuid_A, uuid_B, 50.0) adds a parallel 50 Gbps link.
     """
     client = NetworkSimulatorClient(base_url="http://localhost:8003")
 
@@ -91,7 +122,31 @@ async def create_edge(node1_uuid: str, node2_uuid: str, capacity_gbps: float) ->
 @function_tool
 async def delete_edge(edge_uuid: str) -> str:
     """
-    TODO: Annotate this
+    Delete a network edge (connection) from the network.
+
+    IMPORTANT CONSTRAINT: You can only delete edges that are NOT being used
+    by any active services. If services are using this edge, the deletion will
+    fail with a conflict error.
+
+    Use this tool to remove unused edges or clean up after deprovisioning services.
+
+    Args:
+        edge_uuid: UUID of the edge to delete
+
+    Returns:
+        JSON string containing:
+        SUCCESS CASE:
+        - message: Confirmation of deletion
+        - edge_uuid: UUID of the deleted edge
+        - deleted_at: Timestamp of deletion
+
+        FAILURE CASE:
+        - error: Explanation (e.g., edge in use by services, edge not found)
+        - edge_uuid: UUID that was attempted
+
+    Example:
+        edge_uuid = "0c929850-79fc-4acd-a69d-163dc318353a"
+        Deletes the edge if no services are using it
     """
     client = NetworkSimulatorClient(base_url="http://localhost:8003")
 
@@ -122,7 +177,49 @@ async def create_service(
     path_edge_uuids: list[str],
 ) -> str:
     """
-    TODO: Annotate this
+    Provision a new network service along a specified path.
+
+    This is the PRIMARY tool for service provisioning. It creates a service that
+    reserves bandwidth on all edges in the path. The service will consume capacity
+    from each edge it traverses.
+
+    VALIDATION REQUIREMENTS:
+    - Source must be the first node in path_node_uuids
+    - Destination must be the last node in path_node_uuids
+    - Number of edges must equal number of nodes minus 1
+    - All edges must have sufficient available capacity for the demand
+    - Path must be valid (consecutive nodes connected by edges)
+
+    Args:
+        name: Descriptive name for the service (e.g., "NYC-to-Boston-Service-001")
+        source_node_uuid: UUID of the origin node
+        destination_node_uuid: UUID of the destination node
+        demand_gbps: Bandwidth to reserve in Gbps (must be > 0)
+        path_node_uuids: Ordered list of node UUIDs from source to destination
+        path_edge_uuids: Ordered list of edge UUIDs connecting the nodes
+
+    Returns:
+        JSON string containing:
+        SUCCESS CASE:
+        - uuid: Unique service identifier
+        - name: Service name
+        - source_node_uuid, destination_node_uuid: Endpoints
+        - demand_gbps: Bandwidth reserved
+        - hop_count: Number of hops (edges) in path
+        - total_distance_km: Geographic distance of the path
+        - path_node_uuids: Complete node path
+        - path_edge_uuids: Complete edge path
+        - service_timestamp: When service was created
+        - created_at: Creation timestamp
+
+        FAILURE CASE:
+        - error: Explanation (capacity violation, invalid path, etc.)
+        - Request parameters
+
+    Example:
+        name = "Service-NYC-BOS", source = uuid_NYC, destination = uuid_BOS,
+        demand = 10.0, path_nodes = [uuid_NYC, uuid_ALB, uuid_BOS],
+        path_edges = [edge_NYC_ALB, edge_ALB_BOS]
     """
     client = NetworkSimulatorClient(base_url="http://localhost:8003")
 
@@ -172,7 +269,28 @@ async def create_service(
 @function_tool
 async def delete_service(service_uuid: str) -> str:
     """
-    TODO: Annotate this
+    Delete an existing network service and free its reserved capacity.
+
+    Use this tool to deprovision services that are no longer needed. Deleting
+    a service will free up the bandwidth it was consuming on all edges in its path.
+
+    Args:
+        service_uuid: UUID of the service to delete
+
+    Returns:
+        JSON string containing:
+        SUCCESS CASE:
+        - message: Confirmation of deletion
+        - service_uuid: UUID of the deleted service
+        - deleted_at: Timestamp of deletion
+
+        FAILURE CASE:
+        - error: Explanation (service not found, etc.)
+        - service_uuid: UUID that was attempted
+
+    Example:
+        service_uuid = "4b20d4ae-8932-4f05-b093-cc2202dd3e1e"
+        Deletes the service and frees its reserved bandwidth
     """
     client = NetworkSimulatorClient(base_url="http://localhost:8003")
 
@@ -222,8 +340,64 @@ async def get_database_stats() -> str:
 provisioning_agent = Agent(
     name="NetworkProvisioningAgent",
     instructions="""
-TODO: Write a system prompt!
-""",
+    You are a Network Provisioning Agent specialized in creating and managing network services and capacity.
+
+    YOUR ROLE:
+    - Provision new network services on planned paths
+    - Add capacity to existing connections when needed
+    - Delete services to free up bandwidth
+    - Remove unused edges from the network
+    - Ensure all operations maintain network integrity
+
+    THE NETWORK:
+    - 48 network nodes across the eastern United States
+    - ~200 bidirectional edges (connections) with capacity limits
+    - Services consume bandwidth on the edges they traverse
+    - Network topology is protected - you can only expand existing connections
+
+    YOUR TOOLS:
+    1. create_service(...) - PRIMARY TOOL: Provision a new service on a path
+    2. delete_service(service_uuid) - Remove a service and free its capacity
+    3. create_edge(node1_uuid, node2_uuid, capacity_gbps) - Add capacity to existing connection
+    4. delete_edge(edge_uuid) - Remove an unused edge
+
+    CRITICAL CONSTRAINTS:
+    1. SERVICES: Must have valid paths where:
+       - Source is first node in path
+       - Destination is last node in path
+       - Edge count = node count - 1
+       - All edges have sufficient capacity
+    2. EDGES: Can ONLY create parallel edges on existing connections
+       - Cannot create brand new connections between unconnected nodes
+       - Can only delete edges not used by any service
+    3. CAPACITY: All operations must respect capacity constraints
+
+    WORKFLOW FOR SERVICE PROVISIONING:
+    1. Receive a planned route from the planning agent with:
+       - Source and destination UUIDs
+       - Path nodes (ordered list)
+       - Path edges (ordered list)
+       - Required bandwidth (demand_gbps)
+    2. Validate the path structure (counts match, endpoints correct)
+    3. Call create_service() with all required parameters
+    4. Confirm success or explain failure clearly
+
+    OUTPUT FORMAT:
+    When provisioning succeeds, include:
+    - Service UUID (for future reference)
+    - Service name
+    - Endpoints (source and destination)
+    - Bandwidth reserved (demand_gbps)
+    - Number of hops
+    - Total distance
+
+    IMPORTANT NOTES:
+    - Always validate path structure before calling create_service()
+    - If capacity is insufficient, explain which edge is the bottleneck
+    - When deleting, confirm the service/edge UUID exists
+    - All tool responses are JSON strings - parse them to extract information
+    - Be clear about success vs failure
+    """,
     model=OpenAIResponsesModel(model=GENERATIVE_MODEL, openai_client=llm_client),
     tools=[
         create_edge,

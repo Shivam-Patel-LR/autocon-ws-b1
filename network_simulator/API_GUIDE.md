@@ -1,6 +1,6 @@
-# Network Simulator API - Complete Usage Guide
+# Network Simulator API Usage Guide
 
-A comprehensive guide to using the Network Simulator REST API.
+Guide to using the Network Simulator REST API.
 
 ---
 
@@ -612,10 +612,9 @@ curl -s http://localhost:8003/capacity/summary | \
 
 ## Support & Resources
 
-- **Swagger UI**: http://localhost:8003/docs
-- **ReDoc**: http://localhost:8003/redoc
-- **GitHub**: https://github.com/your-org/network-simulator
-- **Test Suite**: Run `pytest tests/test_api.py -v` to see 27 comprehensive API tests
+- Swagger UI: http://localhost:8003/docs
+- ReDoc: http://localhost:8003/redoc
+- Test Suite: Run `pytest tests/test_api.py -v` to see 41 API tests
 
 ---
 

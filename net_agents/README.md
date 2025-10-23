@@ -1,17 +1,15 @@
 # Network Simulator Client SDK
 
-A comprehensive, production-ready Python client for the Network Simulator API. This SDK provides intuitive interfaces for managing network topology, computing routes, tracking capacity, and creating services. Designed specifically for building AI agents that interact with network infrastructure.
+Python client for the Network Simulator API. This SDK provides interfaces for managing network topology, computing routes, tracking capacity, and creating services.
 
 ## Features
 
-- **Complete API Coverage**: All 50+ API endpoints fully implemented
-- **Type Safety**: Full Pydantic model validation with type hints
-- **Error Handling**: Comprehensive exception hierarchy for robust error management
-- **Sync & Async Ready**: Built on httpx for both synchronous and asynchronous support
-- **Well Documented**: Extensive docstrings, examples, and usage guides
-- **Production Ready**: Context managers, connection pooling, and proper resource cleanup
-- **Tested**: 100+ test cases covering all functionality
-- **AI Agent Friendly**: Clean interfaces designed for autonomous agent integration
+- Complete API coverage for all endpoints
+- Type safety with Pydantic model validation and type hints
+- Exception hierarchy for error management
+- Synchronous and asynchronous support via httpx
+- Context managers for resource cleanup
+- Examples and usage guides
 
 ## Installation
 
@@ -395,11 +393,11 @@ pytest -v
 
 This SDK is designed for AI agent integration with:
 
-- **Clean Interfaces**: Simple, intuitive method names
-- **Type Safety**: Full type hints for IDE autocomplete
-- **Error Context**: Detailed exceptions with actionable information
-- **Idempotent Operations**: Safe to retry on failure
-- **Resource Management**: Automatic cleanup via context managers
+- Simple, intuitive method names
+- Type hints for IDE autocomplete
+- Detailed exceptions with error information
+- Idempotent operations safe to retry
+- Automatic cleanup via context managers
 
 ### Example: Simple AI Agent
 
@@ -519,10 +517,9 @@ Current version: 0.1.0
 ## Changelog
 
 ### 0.1.0 (Initial Release)
-- Complete API coverage for all endpoints
-- Comprehensive error handling
-- Full test suite (100+ tests)
-- Example scripts for all major workflows
+- API coverage for all endpoints
+- Error handling with exception hierarchy
+- Test suite with examples
 - Type hints and Pydantic validation
 - Context manager support
 - Helper methods for common operations

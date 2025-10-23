@@ -29,7 +29,27 @@ load_dotenv()
 @function_tool
 async def get_nodes_by_name(name_substring: str) -> str:
     """
-    TODO: Annotate this
+    Search for network nodes by name substring (case-insensitive).
+
+    Use this tool to find nodes when you know part of their name, such as a city
+    name or state abbreviation. Returns all nodes whose names contain the search term.
+
+    Args:
+        name_substring: Part of the node name to search for (e.g., "Boston", "NY", "Miami")
+
+    Returns:
+        JSON string containing a list of matching nodes with their details:
+        - uuid: Node's unique identifier (required for other operations)
+        - name: Full node name (e.g., "Boston-MA")
+        - latitude/longitude: Geographic coordinates
+        - vendor: Equipment vendor name
+        - capacity_gbps: Total node capacity in Gbps
+        - free_capacity_gbps: Available unused capacity in Gbps
+        - location_string: Formatted lat/lon for display
+
+    Example:
+        search_term = "Boston"
+        Returns nodes like "Boston-MA", "Boston-Downtown", etc.
     """
     client = NetworkSimulatorClient(base_url="http://localhost:8003")
 
@@ -64,7 +84,27 @@ async def get_nodes_by_location(
     latitude: float, longitude: float, max_distance_km: float
 ) -> str:
     """
-    TODO: Annotate thisd
+    Find network nodes within a specified distance from a geographic point.
+
+    Use this tool to find nodes in a specific geographic region. Useful for
+    finding nearby nodes when planning routes or analyzing regional coverage.
+
+    Args:
+        latitude: Center point latitude in degrees (-90 to 90)
+        longitude: Center point longitude in degrees (-180 to 180)
+        max_distance_km: Maximum search radius in kilometers from the center point
+
+    Returns:
+        JSON string containing:
+        - center_latitude: The search center latitude
+        - center_longitude: The search center longitude
+        - radius_km: The search radius
+        - node_count: Number of nodes found
+        - nodes: List of nodes with details including calculated distance_km from center
+
+    Example:
+        latitude = 40.7128, longitude = -74.0060, max_distance_km = 100.0
+        Finds all nodes within 100km of New York City coordinates
     """
     client = NetworkSimulatorClient(base_url="http://localhost:8003")
 
@@ -126,7 +166,34 @@ async def get_nodes_by_location(
 @function_tool
 async def get_node_services(node_uuid: str) -> str:
     """
-    TODO: Annotate this
+    Get all services that use a specific node as source or destination.
+
+    Use this tool to see what services are currently provisioned on a node,
+    either originating from it or terminating at it. Useful for understanding
+    node utilization and existing service patterns.
+
+    Args:
+        node_uuid: The UUID of the node to query
+
+    Returns:
+        JSON string containing:
+        - node_uuid: The queried node's UUID
+        - service_count: Number of services found
+        - services: List of services with details:
+            - uuid: Service unique identifier
+            - name: Service name
+            - source_node_uuid: Origin node UUID
+            - destination_node_uuid: Destination node UUID
+            - demand_gbps: Bandwidth consumed
+            - hop_count: Number of hops in the path
+            - total_distance_km: Path distance
+            - path_node_uuids: Complete path through network
+            - path_edge_uuids: Edges used by the service
+            - service_timestamp: When service was created
+
+    Example:
+        node_uuid = "550e8400-e29b-41d4-a716-446655440000"
+        Returns all services where this node is source or destination
     """
     client = NetworkSimulatorClient(base_url="http://localhost:8003")
 
@@ -172,7 +239,26 @@ async def get_node_services(node_uuid: str) -> str:
 @function_tool
 async def get_edge_by_uuid(edge_uuid: str) -> str:
     """
-    TODO: Annotate this
+    Retrieve detailed information about a specific network edge (connection).
+
+    Use this tool when you have an edge UUID and need to get its details,
+    such as which nodes it connects and its capacity.
+
+    Args:
+        edge_uuid: The UUID of the edge to retrieve
+
+    Returns:
+        JSON string containing edge details:
+        - uuid: Edge unique identifier
+        - node1_uuid: First endpoint node UUID
+        - node2_uuid: Second endpoint node UUID
+        - capacity_gbps: Maximum bandwidth capacity in Gbps
+        - created_at: When the edge was created
+        - updated_at: Last modification timestamp
+
+    Example:
+        edge_uuid = "0c929850-79fc-4acd-a69d-163dc318353a"
+        Returns the connection details between two nodes
     """
     client = NetworkSimulatorClient(base_url="http://localhost:8003")
 
@@ -199,7 +285,27 @@ async def get_edge_by_uuid(edge_uuid: str) -> str:
 @function_tool
 async def get_edge_by_endpoints(node1_uuid: str, node2_uuid: str) -> str:
     """
-    TODO: Annotate this
+    Find the network edge connecting two specific nodes.
+
+    Use this tool when you know two node UUIDs and want to find the direct
+    connection between them. Edges are bidirectional, so node order doesn't matter.
+
+    Args:
+        node1_uuid: UUID of the first node
+        node2_uuid: UUID of the second node
+
+    Returns:
+        JSON string containing edge details:
+        - uuid: Edge unique identifier
+        - node1_uuid: First endpoint node UUID
+        - node2_uuid: Second endpoint node UUID
+        - capacity_gbps: Maximum bandwidth capacity in Gbps
+        - created_at: When the edge was created
+        - updated_at: Last modification timestamp
+
+    Example:
+        node1_uuid = "550e8400-...", node2_uuid = "6ba7b810-..."
+        Returns the edge connecting these two nodes if one exists
     """
     client = NetworkSimulatorClient(base_url="http://localhost:8003")
 
@@ -232,7 +338,29 @@ async def get_edge_by_endpoints(node1_uuid: str, node2_uuid: str) -> str:
 @function_tool
 async def get_node_by_uuid(node_uuid: str) -> str:
     """
-    TODO: Annotate this
+    Retrieve detailed information about a specific network node.
+
+    Use this tool when you have a node's UUID and need its complete details,
+    including capacity, location, and vendor information.
+
+    Args:
+        node_uuid: The UUID of the node to retrieve
+
+    Returns:
+        JSON string containing node details:
+        - uuid: Node unique identifier
+        - name: Node name (e.g., "Boston-MA")
+        - latitude: Geographic latitude
+        - longitude: Geographic longitude
+        - vendor: Equipment vendor name
+        - capacity_gbps: Total node capacity in Gbps
+        - free_capacity_gbps: Available unused capacity in Gbps
+        - created_at: When the node was created
+        - updated_at: Last modification timestamp
+
+    Example:
+        node_uuid = "550e8400-e29b-41d4-a716-446655440000"
+        Returns complete details for that specific node
     """
     client = NetworkSimulatorClient(base_url="http://localhost:8003")
 
@@ -264,7 +392,40 @@ async def find_and_plan_route(
     source_node_uuid: str, destination_node_uuid: str, demand_gbps: float = 5.0
 ) -> str:
     """
-    TODO: Annotate this
+    Compute the optimal route between two nodes using A* pathfinding algorithm.
+
+    This is the PRIMARY tool for route planning. It finds the shortest geographic
+    path that satisfies capacity constraints, using the A* algorithm with Haversine
+    distance for both cost and heuristic estimation.
+
+    Args:
+        source_node_uuid: UUID of the source/origin node
+        destination_node_uuid: UUID of the destination/target node
+        demand_gbps: Required bandwidth in Gbps (default: 5.0)
+
+    Returns:
+        JSON string containing route details:
+        SUCCESS CASE:
+        - success: True
+        - source_node_uuid: Origin node UUID
+        - destination_node_uuid: Destination node UUID
+        - demand_gbps: Requested bandwidth
+        - path_node_uuids: Ordered list of node UUIDs in the path
+        - path_edge_uuids: Ordered list of edge UUIDs in the path
+        - total_distance_km: Geographic distance of the route
+        - hop_count: Number of hops (edges) in the path
+        - min_available_capacity_gbps: Minimum free capacity along the path
+        - computation_time_ms: Time taken to compute the route
+        - capacity_status: "SUFFICIENT" or "INSUFFICIENT" for the demand
+
+        FAILURE CASE:
+        - success: False
+        - error: Description of why no route was found
+        - source_node_uuid, destination_node_uuid, demand_gbps: Request parameters
+
+    Example:
+        source = "550e8400-...", destination = "6ba7b810-...", demand = 10.0
+        Returns the shortest path with at least 10 Gbps capacity available
     """
     client = NetworkSimulatorClient(base_url="http://localhost:8003")
 
@@ -298,11 +459,11 @@ async def find_and_plan_route(
             }
         )
 
-    except:
+    except Exception as e:
         return json.dumps(
             {
                 "success": False,
-                "error": f"No path exists with sufficient capacity for demand of {demand_gbps} Gbps",
+                "error": f"No path exists with sufficient capacity for demand of {demand_gbps} Gbps. Details: {str(e)}",
                 "source_node_uuid": source_node_uuid,
                 "destination_node_uuid": destination_node_uuid,
                 "demand_gbps": demand_gbps,
@@ -314,9 +475,56 @@ async def find_and_plan_route(
 
 # Create the testing agent
 planning_agent = Agent(
-    name="NetworkTestingAgent",
+    name="NetworkPlanningAgent",
     instructions="""
-    TODO: Write a system prompt!
+    You are a Network Planning Agent specialized in analyzing network topology and computing optimal routes.
+
+    YOUR ROLE:
+    - Help users find nodes in the network by name or location
+    - Compute optimal routes between nodes using A* pathfinding
+    - Check capacity availability and constraints
+    - Analyze existing services and network utilization
+    - Provide clear, actionable information about network paths
+
+    THE NETWORK:
+    - 48 network nodes distributed across the eastern United States
+    - ~200 bidirectional connections (edges) between nodes
+    - Each node has a capacity limit in Gbps
+    - Each edge has a capacity limit in Gbps
+    - Services consume capacity on the edges they traverse
+
+    YOUR TOOLS:
+    1. get_nodes_by_name(name_substring) - Search nodes by name (e.g., "Boston", "NY")
+    2. get_nodes_by_location(lat, lon, radius_km) - Find nodes within a geographic region
+    3. get_node_by_uuid(node_uuid) - Get detailed info about a specific node
+    4. get_edge_by_uuid(edge_uuid) - Get info about a specific connection
+    5. get_edge_by_endpoints(node1_uuid, node2_uuid) - Find connection between two nodes
+    6. get_node_services(node_uuid) - List all services using a node
+    7. find_and_plan_route(source_uuid, dest_uuid, demand_gbps) - PRIMARY TOOL for route planning
+
+    WORKFLOW FOR ROUTE PLANNING:
+    1. If given node NAMES (not UUIDs), use get_nodes_by_name() to find their UUIDs
+    2. Once you have both UUIDs, call find_and_plan_route() with source, destination, and bandwidth demand
+    3. Check the capacity_status in the result:
+       - "SUFFICIENT": Route has enough capacity, safe to use
+       - "INSUFFICIENT": Route exists but lacks capacity for the demand
+    4. Present the results clearly, including distance, hop count, and capacity status
+
+    OUTPUT FORMAT:
+    When presenting a route, include:
+    - Source and destination node names
+    - Total distance in km
+    - Number of hops
+    - Minimum available capacity on the path
+    - Whether capacity is sufficient for the demand
+    - The complete path (list of node and edge UUIDs and node names)
+
+    IMPORTANT NOTES:
+    - Always use UUIDs (not names) when calling find_and_plan_route()
+    - Check capacity_status before declaring a route viable
+    - If no route exists, explain why (no path, insufficient capacity, etc.)
+    - Be concise but informative
+    - All tool responses are JSON strings - parse them to extract information
     """,
     model=OpenAIResponsesModel(model=GENERATIVE_MODEL, openai_client=llm_client),
     tools=[

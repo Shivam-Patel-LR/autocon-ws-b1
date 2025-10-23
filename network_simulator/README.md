@@ -4,7 +4,7 @@ A network topology simulator for teaching demonstrations, running in Docker.
 
 ## Overview
 
-This network simulator models network elements (NEs) distributed across the eastern United States and creates realistic network topologies with capacity-constrained connections. Each network element represents an abstracted node that handles routing, switching, and multiplexing. The simulator provides geographic visualizations of both the nodes and their interconnections.
+This network simulator models network elements (NEs) distributed across the eastern United States and creates network topologies with capacity-constrained connections. Each network element represents a node that handles routing, switching, and multiplexing. The simulator provides geographic visualizations of nodes and connections.
 
 ## Features
 
@@ -16,32 +16,32 @@ This network simulator models network elements (NEs) distributed across the east
 - Total network capacity: 78,000 Gbps
 
 ### Connection Building
-- **Three-Phase Algorithm** for creating realistic network topologies:
-  - **Phase I**: Capacity-aware spanning tree for guaranteed connectivity
-  - **Phase II**: Greedy augmentation toward hub-and-spoke structure
-  - **Phase III**: Local spokes for non-hub nodes
-- **Capacity Constraints**: All connections respect node capacity limits
-- **Configurable Parameters**: gamma (capacity importance), beta (distance importance), eta (weight fraction)
-- **Graph Verification**: Automatic validation of connectedness and capacity constraints
+- Three-phase algorithm for creating network topologies:
+  - Phase I: Capacity-aware spanning tree for guaranteed connectivity
+  - Phase II: Greedy augmentation toward hub-and-spoke structure
+  - Phase III: Local spokes for non-hub nodes
+- Capacity constraints enforced on all connections
+- Configurable parameters: gamma (capacity importance), beta (distance importance), eta (weight fraction)
+- Automatic validation of connectedness and capacity constraints
 - Typically generates ~200 connections between nodes
 - Average node degree: ~8 connections per node
 
 ### Visualizations
-- **Network Map**: Geographic visualization using matplotlib and geopandas
-- **Capacity Distribution**: Dual histograms showing node capacities and connection weights
-- **Connection Map**: Network topology showing all connections with weight-based coloring
+- Network Map: Geographic visualization using matplotlib and geopandas
+- Capacity Distribution: Dual histograms showing node capacities and connection weights
+- Connection Map: Network topology showing all connections with weight-based coloring
 - Color-coded displays with continuous color gradients (log scale)
 - US state boundaries with ocean background
 
 ### Data Export
-- **Adjacency Matrix**: CSV export of full network topology
+- Adjacency Matrix: CSV export of full network topology
 - Connection weights representing allocated capacity (Gbps)
 
 ## Quick Start
 
 ### Using Docker Compose (Recommended)
 
-The container now runs a **FastAPI REST API** by default, exposing the network simulator data via HTTP endpoints.
+The container runs a FastAPI REST API by default, exposing the network simulator data via HTTP endpoints.
 
 ```bash
 # Build and run the API server
@@ -179,21 +179,21 @@ network_simulator/
 
 ### Three-Phase Connection Building
 
-The simulator uses a sophisticated three-phase algorithm to create realistic network topologies:
+The simulator uses a three-phase algorithm to create network topologies:
 
-**Phase I: Spanning Tree (Connectivity Guarantee)**
+**Phase I: Spanning Tree**
 - Orders nodes by capacity (descending)
 - Connects each node to its best parent based on preference score: S(u,v) = (Cu × Cv)^γ / d(u,v)^β
 - Creates n-1 edges ensuring full graph connectivity
 - Edge weight = η × min(Ru, Rv) where R is residual capacity
 
-**Phase II: Greedy Augmentation (Hub-and-Spoke Formation)**
-- Iteratively selects node pairs with highest preference scores
+**Phase II: Greedy Augmentation**
+- Selects node pairs with highest preference scores
 - Adds edges until target count reached or capacity exhausted
 - Edge weight scales with normalized preference score: α(S) = 1/4 + S/4
-- Naturally forms hub-and-spoke topology with high-capacity nodes as hubs
+- Forms hub-and-spoke topology with high-capacity nodes as hubs
 
-**Phase III: Local Spokes (Optional)**
+**Phase III: Local Spokes**
 - Non-hub nodes (bottom 75% by capacity) get additional connections
 - Up to 2 additional connections to higher-capacity neighbors
 - Only if target edge count not yet reached
@@ -205,12 +205,12 @@ The simulator uses a sophisticated three-phase algorithm to create realistic net
 
 ### Configurable Parameters
 
-- **gamma (γ)**: Capacity importance (default: 1.5, typical: 1-2)
-- **beta (β)**: Distance importance (default: 2.0, typical: 1-3)
-- **eta (η)**: Weight fraction for Phase I (default: 0.4, must be in (0, 0.5])
-- **target_edges**: Target connection count (default: 200, typical: 200-300)
-- **noise_factor**: Random variation (default: 0.01)
-- **random_seed**: Reproducibility seed (default: 42)
+- gamma (γ): Capacity importance (default: 1.5, typical: 1-2)
+- beta (β): Distance importance (default: 2.0, typical: 1-3)
+- eta (η): Weight fraction for Phase I (default: 0.4, must be in (0, 0.5])
+- target_edges: Target connection count (default: 200, typical: 200-300)
+- noise_factor: Random variation (default: 0.01)
+- random_seed: Reproducibility seed (default: 42)
 
 ## Service Generation
 
@@ -301,10 +301,10 @@ From a typical run:
 ### Algorithm Properties
 
 **Correctness Guarantees:**
-1. **Capacity safety**: No edge capacity is ever exceeded
-2. **Endpoint coverage**: Every node is source/destination of ≥1 service
-3. **Path validity**: All paths are simple (no repeated nodes)
-4. **Reproducibility**: Fixed random seed produces identical results
+1. Capacity safety: No edge capacity is ever exceeded
+2. Endpoint coverage: Every node is source/destination of ≥1 service
+3. Path validity: All paths are simple (no repeated nodes)
+4. Reproducibility: Fixed random seed produces identical results
 
 **Performance Characteristics:**
 - Stage A time: O(n³) for maximum matching
@@ -313,17 +313,17 @@ From a typical run:
 
 ## REST API
 
-The network simulator includes a comprehensive **FastAPI REST API** that exposes all network data via HTTP endpoints with interactive Swagger documentation.
+The network simulator includes a FastAPI REST API that exposes all network data via HTTP endpoints with Swagger documentation.
 
 ### API Features
 
-- **OpenAPI 3.0 Specification** with full Swagger UI
-- **CRUD Operations** for nodes and edges
-- **Analytics Endpoints** for capacity utilization and statistics
-- **UUID-based identifiers** for all entities
-- **Request validation** with Pydantic models
-- **Comprehensive error handling** (404, 400, 409 status codes)
-- **CORS enabled** for cross-origin requests
+- OpenAPI 3.0 Specification with Swagger UI
+- CRUD Operations for nodes and edges
+- Analytics Endpoints for capacity utilization and statistics
+- UUID-based identifiers for all entities
+- Request validation with Pydantic models
+- Error handling (404, 400, 409 status codes)
+- CORS enabled for cross-origin requests
 
 ### Starting the API
 
@@ -404,7 +404,7 @@ curl "http://localhost:8003/nodes?vendor=TeleConnect"
 
 ### API Testing
 
-A comprehensive test suite validates all endpoints:
+Test suite validates all endpoints:
 
 ```bash
 # Run all API tests
@@ -419,28 +419,25 @@ docker compose run --rm network-simulator pytest tests/test_api.py -v
 # - Error handling
 ```
 
-### Complete API Usage Guide
+### API Usage Guide
 
-For detailed API documentation, examples, and best practices, see **[API_GUIDE.md](API_GUIDE.md)**.
+For detailed API documentation and examples, see [API_GUIDE.md](API_GUIDE.md).
 
 The guide includes:
-- Quick start tutorials
-- Complete endpoint reference
+- Endpoint reference
 - Common workflows and examples
 - Error handling patterns
 - Python code examples
-- Advanced usage patterns
-- Monitoring scripts
 
 ## Future Enhancements
 
 Future phases could add:
 
-- **Service Visualization**: Overlay service paths on network map
-- **Network Failure Scenarios**: Simulate node/link failures and rerouting
-- **Dynamic Traffic**: Time-varying traffic patterns and congestion modeling
-- **Quality of Service (QoS)**: Prioritization and bandwidth management
-- **Path Optimization**: Multi-objective routing (latency, cost, reliability)
+- Service Visualization: Overlay service paths on network map
+- Network Failure Scenarios: Simulate node/link failures and rerouting
+- Dynamic Traffic: Time-varying traffic patterns and congestion modeling
+- Quality of Service (QoS): Prioritization and bandwidth management
+- Path Optimization: Multi-objective routing (latency, cost, reliability)
 
 ## License
 

@@ -223,32 +223,32 @@ GROUP BY routing_stage;
 
 ## Benefits of Database Approach
 
-### [DONE] **Referential Integrity**
+### Referential Integrity
 - Foreign key constraints prevent orphaned records
 - Can't delete a node if services reference it
 - Cascade deletes maintain consistency
 
-### [DONE] **Efficient Queries**
+### Efficient Queries
 - "Which services use edge X?" - instant lookup via index
 - Aggregation queries (capacity utilization) in milliseconds
 - Complex joins without loading entire dataset
 
-### [DONE] **Transaction Support**
+### Transaction Support
 - Services inserted atomically with all path data
 - Rollback on errors prevents partial writes
 - ACID guarantees
 
-### [DONE] **No Naming Conflicts**
+### No Naming Conflicts
 - UUIDs are globally unique
 - Safe to merge datasets from different sources
 - Names can change without breaking references
 
-### [DONE] **Scalability**
+### Scalability
 - Handles 10,000+ services efficiently
 - Indexed lookups are O(log n)
 - Can migrate to PostgreSQL if needed
 
-### [DONE] **Single Source of Truth**
+### Single Source of Truth
 - One file to backup: `network.db`
 - No CSV/JSON sync issues
 - Consistent data across all queries
@@ -400,14 +400,14 @@ The database verifier (`verify_database.py`) performs 7 comprehensive checks:
 
 | Feature | File-Based | Database |
 |---------|------------|----------|
-| Referential integrity |  Manual | [DONE] Enforced |
-| Atomicity |  Partial writes | [DONE] Transactions |
-| Query speed |  O(n) linear scan | [DONE] O(log n) indexed |
-| Capacity checks |  Manual aggregation | [DONE] Pre-computed |
-| Concurrency |  File locks | [DONE] WAL mode |
-| Data consistency |  Manual sync | [DONE] Single source |
-| Backup |  Multiple files | [DONE] One file |
-| Schema validation |  Runtime errors | [DONE] Database constraints |
+| Referential integrity |  Manual | Enforced |
+| Atomicity |  Partial writes | Transactions |
+| Query speed |  O(n) linear scan | O(log n) indexed |
+| Capacity checks |  Manual aggregation | Pre-computed |
+| Concurrency |  File locks | WAL mode |
+| Data consistency |  Manual sync | Single source |
+| Backup |  Multiple files | One file |
+| Schema validation |  Runtime errors | Database constraints |
 
 ---
 
@@ -427,12 +427,12 @@ The database becomes the primary storage, CSV/JSON are for interchange.
 
 The database foundation enables:
 
-- **REST API**: Flask/FastAPI service for querying
-- **Real-time monitoring**: Track capacity utilization
-- **Historical tracking**: Store service modifications
-- **Graph algorithms**: Complex network analysis queries
-- **Multi-user support**: Concurrent service generation
-- **PostgreSQL migration**: If dataset grows beyond SQLite
+- REST API: Flask/FastAPI service for querying
+- Real-time monitoring: Track capacity utilization
+- Historical tracking: Store service modifications
+- Graph algorithms: Complex network analysis queries
+- Multi-user support: Concurrent service generation
+- PostgreSQL migration: If dataset grows beyond SQLite
 
 ---
 
@@ -491,16 +491,15 @@ git add data/services_export.json
 ## Summary
 
 The database migration provides:
-- [DONE] **UUID-based identifiers** for all entities
-- [DONE] **Referential integrity** via foreign keys
-- [DONE] **Transaction support** for atomic operations
-- [DONE] **Efficient queries** with proper indexing
-- [DONE] **Single source of truth** in network.db
-- [DONE] **Full verification** via SQL constraints
-- [DONE] **JSON export** for compatibility
-- [DONE] **Production-ready** architecture
+- UUID-based identifiers for all entities
+- Referential integrity via foreign keys
+- Transaction support for atomic operations
+- Efficient queries with proper indexing
+- Single source of truth in network.db
+- Full verification via SQL constraints
+- JSON export for compatibility
 
-The system successfully generated **100 services** with:
+The system successfully generated 100 services with:
 - All capacity constraints satisfied
 - All 48 nodes covered as endpoints
 - All UUIDs unique and properly referenced

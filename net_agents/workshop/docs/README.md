@@ -86,13 +86,12 @@ workshop/
 
 ## Tips for Success
 
-1. **Read the docs first** - SETUP.md and NETWORK_REFERENCE.md
-2. **Run verify_setup.py** - Make sure everything works
-3. **Use the support agent** - It's there to help!
-4. **Experiment** - Try things, break things, learn
-5. **Test incrementally** - Test each tool as you build it
-6. **Read error messages** - They usually tell you what's wrong
-7. **Ask for help** - Don't get stuck for too long
+1. Read the docs first - SETUP.md and NETWORK_REFERENCE.md
+2. Run verify_setup.py to ensure everything works
+3. Use the support agent for help
+4. Test incrementally - test each tool as you build it
+5. Read error messages carefully
+6. Ask for help if stuck
 
 ## Common Issues
 
@@ -124,4 +123,4 @@ Educational use only.
 
 ---
 
-**Ready to start?** → Read [SETUP.md](SETUP.md) first!
+Ready to start? Read [SETUP.md](SETUP.md) first.
