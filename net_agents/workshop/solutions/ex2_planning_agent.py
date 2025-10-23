@@ -51,7 +51,7 @@ async def get_nodes_by_name(name_substring: str) -> str:
         search_term = "Boston"
         Returns nodes like "Boston-MA", "Boston-Downtown", etc.
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         nodes = client.search_nodes_by_name(name_substring)
@@ -106,7 +106,7 @@ async def get_nodes_by_location(
         latitude = 40.7128, longitude = -74.0060, max_distance_km = 100.0
         Finds all nodes within 100km of New York City coordinates
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         nodes = client.get_nodes(
@@ -195,7 +195,7 @@ async def get_node_services(node_uuid: str) -> str:
         node_uuid = "550e8400-e29b-41d4-a716-446655440000"
         Returns all services where this node is source or destination
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         services = client.get_services_by_node(node_uuid)
@@ -260,7 +260,7 @@ async def get_edge_by_uuid(edge_uuid: str) -> str:
         edge_uuid = "0c929850-79fc-4acd-a69d-163dc318353a"
         Returns the connection details between two nodes
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         edge = client.get_edge(edge_uuid)
@@ -307,7 +307,7 @@ async def get_edge_by_endpoints(node1_uuid: str, node2_uuid: str) -> str:
         node1_uuid = "550e8400-...", node2_uuid = "6ba7b810-..."
         Returns the edge connecting these two nodes if one exists
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         edge = client.get_edge_by_endpoints(node1_uuid, node2_uuid)
@@ -362,7 +362,7 @@ async def get_node_by_uuid(node_uuid: str) -> str:
         node_uuid = "550e8400-e29b-41d4-a716-446655440000"
         Returns complete details for that specific node
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         node = client.get_node(node_uuid)
@@ -427,7 +427,7 @@ async def find_and_plan_route(
         source = "550e8400-...", destination = "6ba7b810-...", demand = 10.0
         Returns the shortest path with at least 10 Gbps capacity available
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         route = client.compute_route(

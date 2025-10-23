@@ -63,7 +63,7 @@ async def create_edge(node1_uuid: str, node2_uuid: str, capacity_gbps: float) ->
         Nodes A and B have a 100 Gbps link that's heavily utilized.
         create_edge(uuid_A, uuid_B, 50.0) adds a parallel 50 Gbps link.
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         # First, check if an edge already exists between these nodes
@@ -148,7 +148,7 @@ async def delete_edge(edge_uuid: str) -> str:
         edge_uuid = "0c929850-79fc-4acd-a69d-163dc318353a"
         Deletes the edge if no services are using it
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         client.delete_edge(edge_uuid)
@@ -221,7 +221,7 @@ async def create_service(
         demand = 10.0, path_nodes = [uuid_NYC, uuid_ALB, uuid_BOS],
         path_edges = [edge_NYC_ALB, edge_ALB_BOS]
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         service_create = ServiceCreate(
@@ -292,7 +292,7 @@ async def delete_service(service_uuid: str) -> str:
         service_uuid = "4b20d4ae-8932-4f05-b093-cc2202dd3e1e"
         Deletes the service and frees its reserved bandwidth
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         client.delete_service(service_uuid)
@@ -316,7 +316,7 @@ async def get_database_stats() -> str:
     """
     TODO: Annotate this
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         stats = client.get_database_stats()
