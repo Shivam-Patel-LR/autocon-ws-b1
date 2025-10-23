@@ -1,4 +1,5 @@
 # Workshop Setup Guide
+
 ## Building AI Agents for Smarter Networks
 
 Welcome to the AI Agents workshop! This guide will help you set up your environment for building intelligent network agents.
@@ -99,6 +100,7 @@ curl http://localhost:8003/health
 ```
 
 You should see a response like:
+
 ```json
 {
   "status": "healthy",
@@ -110,6 +112,7 @@ You should see a response like:
 ### Access the API Documentation
 
 Once running, you can explore the API:
+
 - **Swagger UI**: [http://localhost:8003/docs](http://localhost:8003/docs)
 - **ReDoc**: [http://localhost:8003/redoc](http://localhost:8003/redoc)
 
@@ -119,50 +122,9 @@ Once running, you can explore the API:
 
 Run this verification script to make sure everything is working:
 
-```python
-# Save as verify_setup.py
-import os
-from network_simulator_client import NetworkSimulatorClient
-
-# Check API connection
-try:
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
-    health = client.health_check()
-    print(f"[OK] Network Simulator API: {health.status}")
-
-    stats = client.get_database_stats()
-    print(f"[OK] Network loaded: {stats.nodes} nodes, {stats.edges} edges, {stats.services} services")
-
-    client.close()
-except Exception as e:
-    print(f"[FAIL] API Connection Failed: {e}")
-    print("  Make sure the simulator is running: docker compose up -d")
-    exit(1)
-
-# Check OpenAI Agents SDK
-try:
-    import agents
-    print("[OK] OpenAI Agents SDK installed")
-except ImportError:
-    print("[FAIL] OpenAI Agents SDK not installed")
-    print("  Install with: uv pip install openai-agents")
-    exit(1)
-
-# Check API key
-if not os.getenv("OPENAI_API_KEY"):
-    print("[FAIL] OPENAI_API_KEY not set")
-    print("  Create a .env file with your API key")
-    exit(1)
-else:
-    print("[OK] OpenAI API key configured")
-
-print("\nSetup complete! You're ready to start building agents.")
-```
-
-Run it:
 ```bash
 cd net_agents/workshop
-python verify_setup.py
+python ex0_verify_setup.py
 ```
 
 If all checks pass, the setup is complete.
@@ -211,20 +173,19 @@ The workshop materials are organized as follows:
 
 ```
 net_agents/workshop/
-├── SETUP.md                    # This file
-├── NETWORK_REFERENCE.md        # Quick reference for the network simulator
+├── ex1_support_agent.py
+├── ex2_planning_agent.py
+├── ex3_provisioning_agent.py
 ├── EXERCISE_GUIDE.md           # Complete exercise instructions
-├── support_agent.py            # Working support agent implementation
-├── templates/                  # Starter code for each exercise
-│   ├── support_agent_starter.py
-│   ├── planning_agent_starter.py
-│   ├── provisioning_agent_starter.py
-│   └── full_workflow_starter.py
-└── solutions/                  # Reference implementations (for instructors)
-    ├── support_agent_solution.py
-    ├── planning_agent_solution.py
-    ├── provisioning_agent_solution.py
-    └── full_workflow_solution.py
+├── docs/                 # Starter code for each exercise
+│   ├── SETUP.md
+│   ├── NETWORK_REFERENCE.md
+│   ├── README.md
+│   ├── EXERCISE_GUIDE.md
+└── solutions/                  # Reference implementations
+    ├── ex1_support_agent.py
+    ├── ex2_planning_agent.py
+    ├── ex3_provisioning_agent.py
 ```
 
 ---
@@ -237,12 +198,13 @@ The OpenAI Agents SDK provides a simple framework for building AI agents with to
 
 ```python
 from agents import Agent, Runner
+from config import llm_client, GENERATIVE_MODEL
 
 # Create an agent
 agent = Agent(
-    name="MyAgent",
-    instructions="You are a helpful assistant...",
-    model="gpt-4o-mini"  # or "gpt-4o"
+    name="<agent_name>",
+    instructions=f"""<system_prompt>""",
+    model=OpenAIChatCompletionsModel(model=GENERATIVE_MODEL, openai_client=llm_client),
 )
 
 # Run the agent
@@ -328,6 +290,7 @@ See [NETWORK_REFERENCE.md](NETWORK_REFERENCE.md) for complete details.
 **Problem**: `APIConnectionError: Failed to connect to API`
 
 **Solutions**:
+
 - Check if the simulator is running: `docker ps | grep network`
 - Start it if needed: `cd network_simulator && docker compose up -d`
 - Verify it's healthy: `curl http://localhost:8003/health`
@@ -338,6 +301,7 @@ See [NETWORK_REFERENCE.md](NETWORK_REFERENCE.md) for complete details.
 **Problem**: `AuthenticationError` or `API key not found`
 
 **Solutions**:
+
 - Make sure `.env` file exists in `workshop/` directory
 - Check the file contains: `OPENAI_API_KEY=sk-...`
 - Load it in your code: `from dotenv import load_dotenv; load_dotenv()`
@@ -348,6 +312,7 @@ See [NETWORK_REFERENCE.md](NETWORK_REFERENCE.md) for complete details.
 **Problem**: `ModuleNotFoundError: No module named 'openai_agents'`
 
 **Solutions**:
+
 - Make sure virtual environment is activated
 - Install the SDK: `uv pip install openai-agents`
 - For network client: `cd net_agents && uv pip install -e .`
@@ -357,6 +322,7 @@ See [NETWORK_REFERENCE.md](NETWORK_REFERENCE.md) for complete details.
 **Problem**: `Cannot connect to the Docker daemon`
 
 **Solutions**:
+
 - Make sure Docker Desktop is running
 - On Linux: `sudo systemctl start docker`
 - Check Docker is accessible: `docker ps`
@@ -366,6 +332,7 @@ See [NETWORK_REFERENCE.md](NETWORK_REFERENCE.md) for complete details.
 **Problem**: Port 8003 is already in use
 
 **Solutions**:
+
 - Find what's using it: `lsof -i :8003` (Mac/Linux) or `netstat -ano | findstr :8003` (Windows)
 - Stop the process or change the port in `docker-compose.yml`
 
@@ -374,6 +341,7 @@ See [NETWORK_REFERENCE.md](NETWORK_REFERENCE.md) for complete details.
 ## Getting Help
 
 During the workshop:
+
 1. **Use the support agent** - It can answer questions about the network simulator and SDK
 2. **Check the documentation** - NETWORK_REFERENCE.md and EXERCISE_GUIDE.md
 3. **Ask the instructors** - We're here to help!
