@@ -7,7 +7,7 @@ Welcome to the AI Agents workshop! This directory contains all materials for lea
 1. **Setup Environment**: Follow [SETUP.md](SETUP.md)
 2. **Review Network Basics**: Read [NETWORK_REFERENCE.md](NETWORK_REFERENCE.md)
 3. **Start Exercises**: Work through [EXERCISE_GUIDE.md](EXERCISE_GUIDE.md)
-4. **Run Support Agent**: `python support_agent.py` for help
+4. **Run Support Agent**: `python ex1_support_agent.py` for help
 
 ## Workshop Structure
 
@@ -20,15 +20,8 @@ Welcome to the AI Agents workshop! This directory contains all materials for lea
 
 ### Working Code
 
-- **support_agent.py** - Fully functional support agent (Exercise 4 solution)
-- **verify_setup.py** - Setup verification script
-
-### Templates
-
-Starter code for exercises in `templates/`:
-
-- `planning_agent_starter.py` - Exercise 6 template
-- `provisioning_agent_starter.py` - Exercise 7 template
+- **ex1_support_agent.py** - Fully functional support agent
+- **ex0_verify_setup.py** - Setup verification script
 
 ### Solutions
 
@@ -95,12 +88,12 @@ workshop/
 
 ## Common Issues
 
-| Issue                  | Solution                                     |
-| ---------------------- | -------------------------------------------- |
-| API won't connect      | Start simulator: `docker compose up -d`      |
-| No API key             | Create `.env` file with `OPENAI_API_KEY=...` |
-| Import errors          | Install SDK: `uv pip install openai-agents`  |
-| Agent won't call tools | Check tool docstrings are clear              |
+| Issue                  | Solution                                                                    |
+| ---------------------- | --------------------------------------------------------------------------- |
+| API won't connect      | Start simulator: `docker compose up -d`                                     |
+| No API key             | Create `.env` file with the variables in `net_agents/workshop/.env.example` |
+| Import errors          | Install SDK: `uv pip install openai-agents`                                 |
+| Agent won't call tools | Check tool docstrings are clear                                             |
 
 ## Next Steps After Workshop
 

@@ -27,7 +27,6 @@ By the end of this workshop, you will:
 6. [Exercise 6: Build Planning Agent](#exercise-6-build-planning-agent)
 7. [Exercise 7: Build Provisioning Agent](#exercise-7-build-provisioning-agent)
 8. [Exercise 8: Iterative Improvement](#exercise-8-iterative-improvement)
-9. [Exercise 9: Full Workflow Example](#exercise-9-full-workflow-example)
 
 ---
 
@@ -540,13 +539,6 @@ Your agent should:
 - Maintain context across conversation turns
 - Admit when it doesn't have tools/access
 
-### Bonus Challenges
-
-1. Add conversation memory management
-2. Implement query classification to route to best documentation
-3. Add code example generation
-4. Track what topics the user has asked about
-
 ### Key Takeaways
 
 - Agents can be useful without tools
@@ -733,18 +725,20 @@ The Planning Agent finds viable paths between network endpoints.
 
 ### Part A: Review Starter Code (10 min)
 
-Open `templates/planning_agent_starter.py`:
+Open `workshop/ex2_planning_agent.py`:
 
 ```python
 from agents import Agent, Runner
 from network_simulator_client import NetworkSimulatorClient
 
 # TODO: Create tool functions
+@function_tool
 def get_network_nodes():
     """Get all network nodes."""
     # Your code here
     pass
 
+@function_tool
 def find_route(source_uuid: str, destination_uuid: str, demand_gbps: float):
     """Find route between nodes."""
     # Your code here
@@ -752,10 +746,14 @@ def find_route(source_uuid: str, destination_uuid: str, demand_gbps: float):
 
 # TODO: Create agent
 planning_agent = Agent(
-    name="PlanningAgent",
-    instructions="You find viable paths in the network...",
-    model="gpt-4o-mini",
-    tools=[get_network_nodes, find_route]  # Add your tools
+    name="NetworkPlanningAgent",
+    instructions="""
+    TODO: Write a system prompt
+    """,
+    model=OpenAIResponsesModel(model=GENERATIVE_MODEL, openai_client=llm_client),
+    tools=[
+        ...
+    ],
 )
 ```
 
@@ -833,43 +831,7 @@ def find_route(source_uuid: str, destination_uuid: str, demand_gbps: float = 5.0
 
 ### Part C: Write Agent Instructions (15 min)
 
-Create clear instructions for the agent:
-
-```python
-planning_agent = Agent(
-    name="PlanningAgent",
-    instructions="""
-You are a network planning agent that finds viable paths between network nodes.
-
-Your job:
-1. When given source and destination nodes (by name or UUID), find a route
-2. Check that the route has sufficient capacity for the required bandwidth
-3. Return a clear, well-formatted path description
-
-Tools available:
-- get_network_nodes(): Get all nodes in the network
-- find_route(source_uuid, dest_uuid, demand_gbps): Compute a route
-
-Process:
-1. If given node names, use get_network_nodes() to find their UUIDs
-2. Call find_route() with the UUIDs and bandwidth requirement
-3. Check if min_capacity_gbps >= demand_gbps
-4. Format the output clearly
-
-Output format:
-Route from [SOURCE] to [DESTINATION]
-- Distance: [X] km
-- Hops: [N]
-- Min available capacity: [Y] Gbps
-- Status: [VIABLE/INSUFFICIENT CAPACITY]
-- Path: Node1 → Node2 → Node3 → ...
-
-Be concise and clear. If route finding fails, explain why.
-""",
-    tools=[get_network_nodes, find_route],
-    model="gpt-4o-mini"
-)
-```
+Create clear instructions for the agent...
 
 ### Part D: Test Your Agent (15 min)
 
@@ -953,13 +915,6 @@ Your agent should:
 - Give example outputs
 - Ask agent to use specific formatting
 
-### Bonus Challenges
-
-1. Add tool to get node by name (exact match)
-2. Implement breadth-first search instead of using compute_route()
-3. Find multiple alternative routes
-4. Compare routes by different metrics (distance, hops, capacity)
-
 ### Key Takeaways
 
 - Tools are functions the agent can call
@@ -992,7 +947,7 @@ The Provisioning Agent creates services on planned paths.
 
 ### Part A: Review Starter Code (10 min)
 
-Open `templates/provisioning_agent_starter.py`:
+Open `workshop/ex3_provisioning_agent.py`:
 
 ```python
 from agents import Agent, Runner
@@ -1022,8 +977,8 @@ def verify_service(service_uuid: str):
 provisioning_agent = Agent(
     name="ProvisioningAgent",
     instructions="You provision services on the network...",
-    model="gpt-4o-mini",
-    tools=[create_network_service, verify_service]
+    model=...,
+    tools=[...]
 )
 ```
 
@@ -1198,8 +1153,8 @@ Service provisioned successfully!
 
 If provisioning fails, explain why clearly.
 """,
-    tools=[create_network_service, verify_service, delete_network_service],
-    model="gpt-4o-mini"
+    tools=[...],
+    model=...
 )
 ```
 
@@ -1287,13 +1242,6 @@ Your agent should:
 - Add delay before verification
 - Check service UUID is correct
 - Verify API connectivity
-
-### Bonus Challenges
-
-1. Add capacity pre-check before provisioning
-2. Implement rollback on provisioning failure
-3. Support batch provisioning of multiple services
-4. Add service lifecycle management (pause, resume, modify)
 
 ### Key Takeaways
 
@@ -1465,255 +1413,6 @@ if demand_gbps <= 0:
 #### Your Turn
 
 Add better validation to your tools. Test with bad inputs.
-
----
-
-## Exercise 9: Full Workflow Example
-
-**Duration**: 45 minutes  
-**Type**: End-to-End Demo + Practice
-
-### Learning Objectives
-
-- Integrate all agents into a workflow
-- Handle end-to-end service provisioning
-- Practice with real scenarios
-- See the complete picture
-
-### The Complete Workflow
-
-```
-User: "I need a 10 Gbps link from New York to Miami"
-  │
-  ▼
-┌─────────────────────┐
-│  1. Support Agent   │ (Optional: Help user understand)
-│  (No tools)         │
-└─────────────────────┘
-  │
-  ▼
-┌─────────────────────┐
-│  2. Planning Agent  │ Tools: get_nodes, find_route
-│  Find viable path   │ Output: Path with nodes and edges
-└──────────┬──────────┘
-           │ Path
-           ▼
-┌─────────────────────┐
-│  3. Provisioning    │ Tools: create_service, verify
-│  Create service     │ Output: Service UUID
-└──────────┬──────────┘
-           │
-           ▼
-        Success!
-```
-
-### Scenario 1: Simple Provisioning
-
-**User Request**: "Create a 5 Gbps service from Albany-NY to Boston-MA"
-
-**Step 1 - Planning**:
-
-```python
-planning_result = Runner.run_sync(
-    planning_agent,
-    "Find a route from Albany-NY to Boston-MA with 5 Gbps demand"
-)
-print("=== PLANNING ===")
-print(planning_result.final_output)
-# Expected: Route with nodes, edges, distance, capacity
-```
-
-**Step 2 - Provisioning**:
-
-```python
-provisioning_request = f"""
-Provision a service called 'Albany-Boston-Service' using this plan:
-{planning_result.final_output}
-"""
-
-provisioning_result = Runner.run_sync(provisioning_agent, provisioning_request)
-print("\n=== PROVISIONING ===")
-print(provisioning_result.final_output)
-# Expected: Service UUID, confirmation
-```
-
-**Step 3 - Verification**:
-
-```python
-# Extract service UUID from response
-# Verify in network
-client = NetworkSimulatorClient(base_url="http://localhost:8003")
-service = client.get_service(service_uuid)
-print(f"\n=== VERIFICATION ===")
-print(f"Service {service.name} is active")
-print(f"  Consuming {service.demand_gbps} Gbps on {service.hop_count} hops")
-client.close()
-```
-
-### Scenario 2: High-Demand Service
-
-**User Request**: "I need a 50 Gbps connection from NYC to Miami"
-
-**Expected behavior**:
-
-- Planning agent finds route (may fail if insufficient capacity)
-- If route found, provisioning agent creates service
-- If route not found, explain capacity limitation
-
-Try it:
-
-```python
-result = Runner.run_sync(
-    planning_agent,
-    "Find a route from New-York-NY to Miami-FL with 50 Gbps demand"
-)
-print(result.final_output)
-
-# If successful, provision
-# If failed, explain to user why
-```
-
-### Scenario 3: Multiple Services
-
-**User Request**: "Provision three 5 Gbps services: Albany to Boston, NYC to Philadelphia, and Washington to Richmond"
-
-**Your task**: Create a loop or batch process to handle this.
-
-Pseudo-code:
-
-```python
-requests = [
-    ("Albany-NY", "Boston-MA", 5.0),
-    ("New-York-NY", "Philadelphia-PA", 5.0),
-    ("Washington-DC", "Richmond-VA", 5.0)
-]
-
-results = []
-for source, dest, demand in requests:
-    # Plan
-    route = Runner.run_sync(
-        planning_agent,
-        f"Route from {source} to {dest}, {demand} Gbps"
-    )
-
-    # Provision
-    service = Runner.run_sync(
-        provisioning_agent,
-        f"Provision service from {source} to {dest}..."
-    )
-
-    results.append(service.final_output)
-
-# Report all results
-```
-
-### Scenario 4: Network Analysis Before Provisioning
-
-**User Request**: "Find the best route from Albany to Miami"
-
-"Best" could mean:
-
-- Shortest distance
-- Fewest hops
-- Most available capacity
-- Lowest utilization edges
-
-**Your task**: Modify planning agent to consider multiple criteria.
-
-### Activity: Build Your Own Scenario
-
-Create a scenario that:
-
-1. Uses both agents
-2. Requires some decision making
-3. Has success and failure cases
-4. Demonstrates the value of agents
-
-Example ideas:
-
-- "Find routes for 10 services with minimal overlap"
-- "Provision services to balance network load"
-- "Find alternative routes when primary is congested"
-
-### Integration Patterns
-
-#### Pattern 1: Sequential (Simple)
-
-```python
-from agents import Runner
-
-plan = Runner.run_sync(planning_agent, user_request)
-result = Runner.run_sync(
-    provisioning_agent,
-    f"Execute this plan: {plan.final_output}"
-)
-```
-
-#### Pattern 2: Validation Loop
-
-```python
-plan = Runner.run_sync(planning_agent, user_request)
-
-# Validate plan
-if validate_plan(plan.final_output):
-    result = Runner.run_sync(
-        provisioning_agent,
-        f"Execute: {plan.final_output}"
-    )
-else:
-    plan = Runner.run_sync(
-        planning_agent,
-        f"That plan failed. Try again: {user_request}"
-    )
-```
-
-#### Pattern 3: Orchestrator
-
-```python
-from agents import Runner
-
-class WorkflowOrchestrator:
-    def provision_service(self, source, dest, demand):
-        # 1. Plan
-        plan = Runner.run_sync(
-            self.planning_agent,
-            f"Route {source} to {dest}, {demand} Gbps"
-        )
-
-        # 2. Check
-        if not self.is_valid_plan(plan.final_output):
-            return {"error": "No valid route"}
-
-        # 3. Provision
-        result = Runner.run_sync(
-            self.provisioning_agent,
-            f"Provision: {plan.final_output}"
-        )
-
-        # 4. Verify
-        if self.verify_provisioning(result.final_output):
-            return {"success": True, "service": result.final_output}
-        else:
-            return {"error": "Provisioning failed"}
-```
-
-### Success Criteria
-
-By the end of this exercise, you should be able to:
-
-- Plan and provision services end-to-end
-- Handle success and failure cases
-- Coordinate multiple agents
-- Validate intermediate results
-- Explain what each agent does and why
-
-### Key Takeaways
-
-- Agents work best with clear responsibilities
-- Inter-agent communication needs structure
-- Validation between stages prevents errors
-- Real workflows need error handling
-- Testing each component helps debug the whole
 
 ---
 
