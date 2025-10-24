@@ -32,7 +32,7 @@ async def create_edge(node1_uuid: str, node2_uuid: str, capacity_gbps: float) ->
     """
     TODO: What this  tool does, when to call it, and how it should be used
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         # First, check if an edge already exists between these nodes
@@ -93,7 +93,7 @@ async def delete_edge(edge_uuid: str) -> str:
     """
     TODO: What this  tool does, when to call it, and how it should be used
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         client.delete_edge(edge_uuid)
@@ -124,7 +124,7 @@ async def create_service(
     """
     TODO: What this  tool does, when to call it, and how it should be used
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         service_create = ServiceCreate(
@@ -174,7 +174,7 @@ async def delete_service(service_uuid: str) -> str:
     """
     TODO: What this  tool does, when to call it, and how it should be used
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         client.delete_service(service_uuid)
@@ -198,7 +198,7 @@ async def get_database_stats() -> str:
     """
     TODO: Annotate this
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         stats = client.get_database_stats()

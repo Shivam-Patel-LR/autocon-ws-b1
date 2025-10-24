@@ -18,7 +18,7 @@ def check_api_connection():
     try:
         from network_simulator_client import NetworkSimulatorClient
 
-        client = NetworkSimulatorClient(base_url="http://localhost:8003", timeout=5.0)
+        client = NetworkSimulatorClient(base_url="http://network-simulator:8003", timeout=5.0)
         health = client.health_check()
         print(f"✓ Network Simulator API: {health.status}")
 

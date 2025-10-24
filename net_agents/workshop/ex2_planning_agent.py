@@ -31,7 +31,7 @@ async def get_nodes_by_name(name_substring: str) -> str:
     """
     TODO: What this  tool does, when to call it, and how it should be used
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         nodes = client.search_nodes_by_name(name_substring)
@@ -66,7 +66,7 @@ async def get_nodes_by_location(
     """
     TODO: What this  tool does, when to call it, and how it should be used
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         nodes = client.get_nodes(
@@ -128,7 +128,7 @@ async def get_node_services(node_uuid: str) -> str:
     """
     TODO: What this  tool does, when to call it, and how it should be used
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         services = client.get_services_by_node(node_uuid)
@@ -174,7 +174,7 @@ async def get_edge_by_uuid(edge_uuid: str) -> str:
     """
     TODO: What this  tool does, when to call it, and how it should be used
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         edge = client.get_edge(edge_uuid)
@@ -201,7 +201,7 @@ async def get_edge_by_endpoints(node1_uuid: str, node2_uuid: str) -> str:
     """
     TODO: What this  tool does, when to call it, and how it should be used
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         edge = client.get_edge_by_endpoints(node1_uuid, node2_uuid)
@@ -234,7 +234,7 @@ async def get_node_by_uuid(node_uuid: str) -> str:
     """
     TODO: What this  tool does, when to call it, and how it should be used
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         node = client.get_node(node_uuid)
@@ -266,7 +266,7 @@ async def find_and_plan_route(
     """
     TODO: What this  tool does, when to call it, and how it should be used
     """
-    client = NetworkSimulatorClient(base_url="http://localhost:8003")
+    client = NetworkSimulatorClient(base_url="http://network-simulator:8003")
 
     try:
         route = client.compute_route(

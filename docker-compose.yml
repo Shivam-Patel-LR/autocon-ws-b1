@@ -1,0 +1,43 @@
+services:
+  # Network simulator API service
+  network-simulator:
+    image: ghcr.io/shivam-patel-lr/network-simulator:latest
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./network_simulator/data:/app/data
+      - ./network_simulator/output:/app/output
+    environment:
+      - FORCE_REBUILD=false
+      - SKIP_VERIFICATION=false
+      - GENERATE_SERVICES=true
+      - NUM_SERVICES=100
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8003/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Workshop development environment
+  workshop:
+    image: ghcr.io/shivam-patel-lr/workshop-env:latest
+    volumes:
+      - .:/workspace
+      - workshop-vscode:/home/workshop/.vscode-server
+    working_dir: /workspace
+    environment:
+      - PYTHONPATH=/workspace/net_agents
+      - PYTHONUNBUFFERED=1
+      - NETWORK_SIMULATOR_URL=http://network-simulator:8003
+    depends_on:
+      network-simulator:
+        condition: service_healthy
+    ports:
+      - "8888:8888"  # Jupyter notebook
+    stdin_open: true
+    tty: true
+    command: /bin/bash
+
+volumes:
+  workshop-vscode:
